@@ -386,13 +386,17 @@ let phaseEndsAt=0;
 let failedStage=-1;
 let audioCtx=null;
 let musicGain=null,sfxGain=null,musicTimer=null,musicStage=-1,musicGeneration=0;
+const stage1Track=new Audio("./bike%20-%20stage%201.mp3");
+stage1Track.preload="auto";
+stage1Track.loop=true;
 let soundPrefs={musicOn:true,musicVol:0.28,sfxOn:true,sfxVol:0.55};
 try{const saved=JSON.parse(localStorage.getItem("valhallaSoundPrefs")||"null");if(saved)soundPrefs={...soundPrefs,...saved}}catch(_){}
 musicOn.checked=soundPrefs.musicOn;musicVol.value=Math.round(soundPrefs.musicVol*100);sfxOn.checked=soundPrefs.sfxOn;sfxVol.value=Math.round(soundPrefs.sfxVol*100);
 function updateSoundUI(){
   musicVolVal.textContent=Math.round(soundPrefs.musicVol*100)+"%";
   sfxVolVal.textContent=Math.round(soundPrefs.sfxVol*100)+"%";
-  musicGain&&(musicGain.gain.value=soundPrefs.musicOn?soundPrefs.musicVol:0);
+  stage1Track.volume=soundPrefs.musicOn?soundPrefs.musicVol:0;
+  musicGain&&(musicGain.gain.value=0);
   sfxGain&&(sfxGain.gain.value=soundPrefs.sfxOn?soundPrefs.sfxVol:0);
 }
 updateSoundUI();
@@ -407,19 +411,17 @@ function ensureAudio(){
     return true;
   }catch(_){return false}
 }
-const stage1Track=new Audio("./bike%20-%20stage%201.mp3");
-stage1Track.preload="auto";
-stage1Track.loop=true;
-
 function stopBackgroundMusic(){
   stage1Track.pause();
   stage1Track.currentTime=0;
+  musicStage=-1;
 }
 function startBackgroundMusic(stage){
   if(stage!==0 || !soundPrefs.musicOn)return;
   stage1Track.loop=true;
-  stage1Track.volume=Math.max(0,Math.min(1,soundPrefs.musicVol));
+  stage1Track.volume=soundPrefs.musicVol;
   stage1Track.play().catch(()=>{});
+  musicStage=stage;
 }
 function horn(){
   if(!soundPrefs.sfxOn||!ensureAudio())return;
@@ -466,7 +468,7 @@ function bindSoundSettings(){
     if(soundPrefs.musicOn&&gamePhase==="playing")startBackgroundMusic(currentStage);else if(!soundPrefs.musicOn)stopBackgroundMusic();
   });
   sfxOn.addEventListener("change",()=>{soundPrefs.sfxOn=sfxOn.checked;saveSoundPrefs();updateSoundUI()});
-  musicVol.addEventListener("input",()=>{soundPrefs.musicVol=+musicVol.value/100;saveSoundPrefs();updateSoundUI()});
+  musicVol.addEventListener("input",()=>{soundPrefs.musicVol=+musicVol.value/100;stage1Track.volume=soundPrefs.musicOn?soundPrefs.musicVol:0;saveSoundPrefs();updateSoundUI()});
   sfxVol.addEventListener("input",()=>{soundPrefs.sfxVol=+sfxVol.value/100;saveSoundPrefs();updateSoundUI()});
 }
 bindSoundSettings();
@@ -827,28 +829,9 @@ requestAnimationFrame(loop);
 setTimeout(()=>tip.classList.add("hidden"),9000);
 </script>
 
-<!-- STAGE1_AUDIO: isolated from the game renderer -->
-<audio id="stage1Music" preload="auto" loop></audio>
 <script>
-// STAGE1_AUDIO — deliberately isolated from game initialization/rendering.
-(function(){
-  const a=document.getElementById("stage1Music");
-  if(!a) return;
-  a.src="bike - stage 1.mp3";
-  a.loop=true;
-  a.volume=0.28;
-
-  function tryStart(){
-    a.play().catch(()=>{});
-  }
-  // A real user gesture is required on many mobile browsers.
-  document.addEventListener("pointerdown", tryStart, {capture:true, passive:true});
-  document.addEventListener("touchstart", tryStart, {capture:true, passive:true});
-  window.addEventListener("keydown", tryStart, {capture:true});
-
-  // Do not throw or alter any game state if audio fails.
-})();
+// Custom Stage 1 MP3: start on the first normal user interaction, with no Play button.
+document.addEventListener("pointerdown",()=>{if(gamePhase==="playing")startBackgroundMusic(currentStage)},{capture:true,passive:true});
 </script>
-
 </body>
 </html>
