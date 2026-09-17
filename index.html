@@ -279,11 +279,20 @@ const GROUND_Y=.68;
 const WORLD_TERRAIN_BASE=529;
 const AIR_TRACK=.35;
 const STAGE_COUNT=6;
-const STAGE_SPEED_KMH=[15,18,20,22,22,25];
+// Every stage is derived directly from the unchanged stage-one riding speed.
+const BASE_SPEED_KMH=15;
 const BASE_RIDE_SPEED=560;
-function stageSpeedScale(stage){return STAGE_SPEED_KMH[stage]/15;}
-function stageMaxSpeed(stage){return BASE_RIDE_SPEED*stageSpeedScale(stage);}
-function displayedSpeed(vx,stage){return Math.round(Math.min(STAGE_SPEED_KMH[stage],Math.abs(vx)/BASE_RIDE_SPEED*15));}
+const BASE_ACCELERATION=560;
+const BASE_BRAKING=390;
+const STAGE_SPEED_KMH=[15,17,19,21,21,23];
+const STAGE_RIDING=STAGE_SPEED_KMH.map(kmh=>{
+  const ratio=kmh/BASE_SPEED_KMH;
+  return {kmh,ratio,maxSpeed:BASE_RIDE_SPEED*ratio,acceleration:BASE_ACCELERATION*ratio,braking:BASE_BRAKING*ratio};
+});
+function stageMaxSpeed(stage){return STAGE_RIDING[stage].maxSpeed;}
+function displayedSpeed(vx,stage){
+  return Math.round(Math.min(STAGE_RIDING[stage].kmh,Math.abs(vx)*BASE_SPEED_KMH/BASE_RIDE_SPEED));
+}
 const STAGE_LENGTHS=[20000,25000,25000,25000,25000,25000];
 const STAGE_STARTS=[0];
 for(let i=1;i<STAGE_COUNT;i++)STAGE_STARTS[i]=STAGE_STARTS[i-1]+STAGE_LENGTHS[i-1];
@@ -1102,10 +1111,10 @@ function loseLife(reason){
 
 function update(dt){
   if(gameOver||won||transitionLock||gamePhase!=="playing")return;
-  const speedScale=stageSpeedScale(currentStage);
-  if(keys.accelerate)p.vx+=560*speedScale*dt;
-  if(keys.brake)p.vx-=390*speedScale*dt;
-  p.vx*=Math.pow(.985,dt*60);p.vx=clamp(p.vx,-90,stageMaxSpeed(currentStage));
+  const riding=STAGE_RIDING[currentStage];
+  if(keys.accelerate)p.vx+=riding.acceleration*dt;
+  if(keys.brake)p.vx-=riding.braking*dt;
+  p.vx*=Math.pow(.985,dt*60);p.vx=clamp(p.vx,-90,riding.maxSpeed);
   p.vy+=1250*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;
 
   // Resolve the finish BEFORE sampling the terrain. This is important when a
