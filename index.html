@@ -140,9 +140,33 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 }
 </style>
 
+<style>
+#gameMenuBtn{position:absolute;right:max(12px,env(safe-area-inset-right));top:max(84px,calc(78px + env(safe-area-inset-top)));z-index:12;width:44px;height:40px;border:1px solid #ffffff45;border-radius:12px;background:#151827e8;color:white;font-size:22px;cursor:pointer}
+#gameMenu{width:min(300px,calc(100vw - 32px));padding:18px;border:1px solid #ffffff35;border-radius:18px;background:#171827;color:white;box-shadow:0 16px 60px #0009;text-align:center}
+#gameMenu::backdrop{background:#0008}
+#gameMenu h2{font-size:18px;margin:4px 24px 18px}
+#gameMenuClose{position:absolute;top:8px;right:8px;background:transparent;border:0;color:white;font-size:25px;cursor:pointer}
+.gameMenuOption{display:block;width:100%;padding:12px;margin-top:10px;border:1px solid #ffffff30;border-radius:10px;background:#2c3044;color:white;font:600 15px system-ui;cursor:pointer}
+.gameMenuOption span{display:block;font-size:12px;opacity:.8;margin-top:3px}
+#gameMenu [hidden]{display:none}
+#gameMenu button:focus-visible,#gameMenuBtn:focus-visible{outline:2px solid #a9d8ff;outline-offset:3px}
+</style>
+<style>
+/* One aligned toolbar: fullscreen, settings, game menu. */
+#gameMenuBtn{top:max(10px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));height:44px}
+#settingsBtn{right:max(64px,calc(52px + env(safe-area-inset-right)))}
+#fullscreen{right:max(116px,calc(104px + env(safe-area-inset-right))) !important;height:44px}
+</style>
 </head>
 <body>
 <canvas id="game"></canvas>
+<button id="gameMenuBtn" type="button" aria-label="תפריט משחק / Game menu" aria-haspopup="dialog">☰</button>
+<dialog id="gameMenu" aria-labelledby="gameMenuTitle">
+  <button id="gameMenuClose" type="button" aria-label="סגירה / Close">×</button>
+  <h2 id="gameMenuTitle"><span lang="he" dir="rtl">תפריט משחק</span><br>Game menu</h2>
+  <button id="exitGameBtn" class="gameMenuOption" type="button"><b lang="he" dir="rtl">לצאת מהמשחק</b><span>Exit game</span></button>
+  <button id="newGameBtn" class="gameMenuOption" type="button"><b lang="he" dir="rtl">להתחיל משחק חדש</b><span>Start new game</span></button>
+</dialog>
 <div id="hud"><div class="title">VALHALLA TRAIL</div><div class="stats" id="stats"><span class="statsLine" id="statsLine1"></span><span class="statsLine" id="statsLine2"></span><span class="statsLine" id="statsLine3"></span><span class="statsLine scoreLine" id="statsLine4"></span></div><div class="lives" id="lives"></div></div>
 <button id="fullscreen" type="button">⛶ Full screen</button>
 <button id="settingsBtn" type="button" aria-label="Settings">⚙</button>
@@ -196,6 +220,49 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 <div id="rotate">↻<br><br>סובב את הטלפון לרוחב<br>לחוויית משחק מיטבית<br><br>Rotate your phone to landscape<br>for the best ride.</div>
 
 <script>
+let menuPaused=false,gameExited=false,menuOpenedAt=0;
+const gameMenu=document.getElementById("gameMenu"),gameMenuBtn=document.getElementById("gameMenuBtn");
+const menuClose=document.getElementById("gameMenuClose"),exitGameBtn=document.getElementById("exitGameBtn");
+function openGameMenu(){
+  if(menuPaused)return;
+  menuPaused=true;menuOpenedAt=performance.now();clearControls();
+  stageTracks.forEach(t=>t.pause());
+  settingsOverlay.style.display="none";
+  gameMenu.showModal();
+}
+function closeGameMenu(){
+  if(gameExited)return;
+  if(phaseEndsAt)phaseEndsAt+=performance.now()-menuOpenedAt;
+  menuPaused=false;gameMenu.close();clearControls();
+  if(gamePhase==="playing")startBackgroundMusic(currentStage);
+  gameMenuBtn.focus();
+}
+function exitGame(){
+  gameExited=true;menuPaused=true;gamePhase="exited";clearControls();stopBackgroundMusic();
+  // Attempt closure directly during the user's click, before any async work.
+  try{window.close()}catch(_){}
+  // If closure is blocked, leave a quiet terminal screen with no restart action.
+  if(audioCtx)try{audioCtx.suspend().catch(()=>{})}catch(_){}
+  document.getElementById("gameMenuTitle").innerHTML='<span lang="he" dir="rtl">אפשר לסגור את הלשונית</span><br><span lang="en">You can close this tab</span>';
+  menuClose.hidden=true;exitGameBtn.hidden=true;
+  document.getElementById("newGameBtn").hidden=true;
+  const title=document.getElementById("gameMenuTitle");title.tabIndex=-1;title.focus();
+  if(document.fullscreenElement)try{document.exitFullscreen().catch(()=>{})}catch(_){}
+}
+function startNewGame(){
+  gameMenu.close();menuPaused=false;gameExited=false;phaseEndsAt=0;
+  menuClose.hidden=false;exitGameBtn.hidden=false;
+  document.getElementById("gameMenuTitle").innerHTML='<span lang="he" dir="rtl">תפריט משחק</span><br>Game menu';
+  ensureAudio();restart();gameMenuBtn.focus();
+}
+gameMenuBtn.addEventListener("pointerdown",e=>e.stopPropagation());
+gameMenuBtn.addEventListener("click",openGameMenu);
+menuClose.addEventListener("click",closeGameMenu);
+exitGameBtn.addEventListener("click",exitGame);
+document.getElementById("newGameBtn").addEventListener("click",startNewGame);
+gameMenu.addEventListener("pointerdown",e=>e.stopPropagation());
+gameMenu.addEventListener("cancel",e=>{e.preventDefault();closeGameMenu()});
+gameMenu.addEventListener("click",e=>{if(e.target===gameMenu){const r=gameMenu.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeGameMenu()}});
 const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
 const stats=document.getElementById("stats"),livesEl=document.getElementById("lives"),lifeTop=document.getElementById("lifeTop"),msg=document.getElementById("msg"),tip=document.getElementById("tip");
 const settingsBtn=document.getElementById("settingsBtn"),settingsOverlay=document.getElementById("settingsOverlay"),settingsClose=document.getElementById("settingsClose");
@@ -231,7 +298,26 @@ async function goFullscreen(){
     if(screen.orientation?.lock) try{await screen.orientation.lock("landscape")}catch(_){}
   }catch(_){}
 }
-document.getElementById("fullscreen").addEventListener("click",e=>{e.stopPropagation();goFullscreen()});
+const fullscreenButton=document.getElementById("fullscreen");
+function updateFullscreenButton(){
+  const active=!!document.fullscreenElement;
+  fullscreenButton.textContent=active?"⛶ Exit full screen":"⛶ Full screen";
+  fullscreenButton.setAttribute("aria-label",active?"Exit full screen":"Enter full screen");
+  fullscreenButton.setAttribute("aria-pressed",String(active));
+}
+async function toggleFullscreen(){
+  try{
+    if(document.fullscreenElement){
+      await document.exitFullscreen();
+      try{screen.orientation?.unlock?.()}catch(_){}
+    }else await goFullscreen();
+  }catch(_){}
+  updateFullscreenButton();
+}
+fullscreenButton.addEventListener("pointerdown",e=>e.stopPropagation());
+fullscreenButton.addEventListener("click",e=>{e.stopPropagation();toggleFullscreen()});
+document.addEventListener("fullscreenchange",updateFullscreenButton);
+updateFullscreenButton();
 addEventListener("pointerdown",()=>{if(matchMedia("(orientation:portrait) and (max-width:650px)").matches)return;if(!document.fullscreenElement)goFullscreen()},{once:true});
 
 function bindButton(btn,action){
@@ -260,6 +346,7 @@ function editingControl(target){
   return target?.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target?.tagName||"");
 }
 addEventListener("keydown",e=>{
+  if(menuPaused||gameExited)return;
   if(editingControl(e.target))return;
   const action=keyboardActions[e.code]||keyboardActions[e.key];
   if(action){
@@ -341,47 +428,72 @@ function rawTerrain(stage,lx){
 }
 const stageOffsets=[0];
 for(let s=1;s<STAGE_COUNT;s++) stageOffsets[s]=stageOffsets[s-1]+rawTerrain(s-1,STAGE_LENGTHS[s-1])-rawTerrain(s,0);
+const flowingDrops=[{"stage":0,"x":18500,"w":750,"h":200,"approach":200,"runout":600},{"stage":1,"x":14000,"w":900,"h":250,"approach":300,"runout":1000},{"stage":2,"x":14000,"w":1050,"h":310,"approach":300,"runout":650},{"stage":3,"x":15100,"w":1200,"h":370,"approach":250,"runout":1000},{"stage":4,"x":9200,"w":1350,"h":430,"approach":350,"runout":1400},{"stage":5,"x":11000,"w":1500,"h":500,"approach":400,"runout":1300}];
+function dropTerrain(stage,lx,y){
+  const f=flowingDrops[stage];
+  if(lx<f.x-f.approach||lx>f.x+f.w+f.runout)return y;
+  const lip=rawTerrain(stage,f.x)+stageOffsets[stage];
+  if(lx<f.x)return y+(lip-y)*smoothstep((lx-f.x+f.approach)/f.approach);
+  const t=(lx-f.x)/f.w;
+  // A short, steep face immediately after the take-off lip.
+  if(t<=.345)return lip+.75*f.h*smoothstep((t-.30)/.045);
+  if(t<=.80)return lip+.75*f.h;
+  if(t<=1){
+    // A longer lower shelf ends in a short, pronounced downhill landing.
+    const q=(t-.80)/.20;
+    return lip+f.h*(.75+.25*q*q*(2-q));
+  }
+  // Continue the landing grade briefly before blending back into the trail.
+  const distance=lx-f.x-f.w;
+  const landingSlope=.25*f.h/(.20*f.w);
+  const extension=.04*f.w;
+  const downhill=lip+f.h+landingSlope*distance;
+  const blend=smoothstep((distance-extension)/(f.runout-extension));
+  return downhill+(y-downhill)*blend;
+}
 function baseTerrain(x){
   const s=stageIndex(x),lx=localX(x);
-  return rawTerrain(s,lx)+stageOffsets[s];
+  return dropTerrain(s,lx,rawTerrain(s,lx)+stageOffsets[s]);
+}
+// Preserve collectible clearance as the surrounding terrain changes.
+function collectibleTerrainShift(stage,x){
+  if(stage===0)return 0;
+  const lx=x-STAGE_STARTS[stage];
+  return baseTerrain(x)-(rawTerrain(stage,lx)+stageOffsets[stage]);
 }
 
 // Jump features: clean MTB shapes (kickers, tables and controlled drops).
 // Each feature is expressed in local stage coordinates and then mapped to its stage.
 const featureSpecs=[
+  // Stage 1: large test drop with a smooth approach and extended runout.
   // Stage 2 rebuilt: smooth technical line with bridge, kicker, table and drop.
   {stage:1,type:"bridge",x:3000,w:620,h:0},
   {stage:1,type:"kicker",x:5700,w:250,h:52},
-  {stage:1,type:"table",x:9400,w:500,h:56,plateau:180},
-  {stage:1,type:"drop",x:14000,w:360,h:46},
+  {stage:1,type:"table",x:9400,w:600,h:100,plateau:240},
   {stage:1,type:"kicker",x:20700,w:270,h:56},
   // Stage 3
   {stage:2,type:"bridge",x:3000,w:700,h:0},
   {stage:2,type:"kicker",x:5700,w:260,h:58},
-  {stage:2,type:"table",x:10400,w:520,h:64,plateau:190},
-  {stage:2,type:"drop",x:15100,w:390,h:54},
+  {stage:2,type:"table",x:10400,w:800,h:150,plateau:320},
   {stage:2,type:"kicker",x:21700,w:280,h:62},
   // Stage 4
   {stage:3,type:"bridge",x:2600,w:760,h:0},
   {stage:3,type:"kicker",x:5200,w:280,h:64},
-  {stage:3,type:"table",x:9700,w:560,h:68,plateau:200},
-  {stage:3,type:"drop",x:15100,w:420,h:58},
+  {stage:3,type:"table",x:9700,w:950,h:200,plateau:380},
   {stage:3,type:"kicker",x:6150,w:260,h:54},
   {stage:3,type:"kicker",x:14550,w:260,h:58},
   {stage:3,type:"kicker",x:21600,w:300,h:68},
   // Stage 5
   {stage:4,type:"bridge",x:2400,w:820,h:0},
   {stage:4,type:"kicker",x:5000,w:300,h:68},
-  {stage:4,type:"drop",x:9200,w:440,h:60},
-  {stage:4,type:"table",x:14200,w:600,h:74,plateau:220},
+  {stage:4,type:"table",x:13175,w:1100,h:250,plateau:440},
   {stage:4,type:"kicker",x:7600,w:260,h:56},
   {stage:4,type:"kicker",x:18100,w:280,h:60},
   {stage:4,type:"kicker",x:21600,w:320,h:72},
   // Stage 6
   {stage:5,type:"bridge",x:2200,w:900,h:0},
   {stage:5,type:"kicker",x:4800,w:320,h:72},
-  {stage:5,type:"table",x:9400,w:620,h:78,plateau:230},
-  {stage:5,type:"drop",x:15000,w:460,h:64},
+  {stage:5,type:"table",x:8500,w:1300,h:300,plateau:520},
   {stage:5,type:"kicker",x:7500,w:270,h:62},
   {stage:5,type:"kicker",x:13850,w:290,h:66},
   {stage:5,type:"kicker",x:21400,w:340,h:78}
@@ -405,7 +517,7 @@ const restoredBridgeSpecs=[
   {stage:4,x:16600,w:1100,h:0},
   {stage:5,x:17000,w:1200,h:0}
 ];
-featureSpecs.push(...restoredBridgeSpecs);
+featureSpecs.push(...restoredBridgeSpecs, ...flowingDrops.map(f=>({...f,type:"drop",flowing:true})));
 const features=featureSpecs.map(f=>({...f,x:STAGE_STARTS[f.stage]+f.x}));
 const gaps=gapSpecs.map(f=>({...f,x:STAGE_STARTS[f.stage]+f.x,type:"gap"}));
 const allFeatures=[...features,...gaps];
@@ -424,7 +536,7 @@ const coins=[];
 for(let s=0;s<STAGE_COUNT;s++){
   for(const [i,[x,y]] of coinLayouts[s].entries()){
     // Each arc contains five coins; lower its middle coin by 35 world units.
-    coins.push({x,y:y+(i%5===2?35:0),stage:s,collected:false,spin:Math.random()*Math.PI*2});
+    coins.push({x,y:y+(i%5===2?35:0)+collectibleTerrainShift(s,x),stage:s,collected:false,spin:Math.random()*Math.PI*2});
   }
 }
 
@@ -433,9 +545,12 @@ const diamonds=[];
 for(let s=0;s<STAGE_COUNT;s++){
   for(const [x,y] of diamondLayouts[s]){
     // Clear the riding hitbox; a modest jump brings the diamond into reach.
-    diamonds.push({x,y:Math.min(y-55,terrain(x)-300),stage:s,collected:false,spin:Math.random()*Math.PI*2});
+    diamonds.push({x,y:(s===0&&x>=18300&&x<=19850?terrain(x)-300:Math.min(y-55+collectibleTerrainShift(s,x),terrain(x)-300)),stage:s,collected:false,spin:Math.random()*Math.PI*2});
   }
 }
+
+// Preserve existing coin clearance over the resized tables.
+for(const [index,shift] of [[48,-44],[49,-32.592592592592595],[123,1.4173815969544314],[124,-141.26968697367047],[170,-199.18689440503798],[171,-354.15374012537677],[172,-291.7208521103733],[173,-227.6686396244632],[174,-126.9418420753702]])coins[index].y+=shift;
 
 function resetCoins(){
   for(const c of coins)c.collected=false;
@@ -703,30 +818,17 @@ function featureSurface(f,x){
     return edge+(end-edge)*smoothstep(t)-f.h*Math.pow(Math.sin(Math.PI*clamp(t,0,1)),1.35);
   }
   if(f.type==="table"){
-    const rise=f.plateau||Math.min(220,f.w*.34);
-    const run=Math.max(90,Math.min(150,(f.w-rise)/2));
-    const platStart=run,platEnd=f.w-run;
-    let offset=0;
-    if(x-f.x<run) offset=-f.h*smoothstep((x-f.x)/run);
-    else if(x-f.x<=platEnd) offset=-f.h;
-    else offset=-f.h*(1-smoothstep((x-f.x-platEnd)/run));
-    return edge+(end-edge)*smoothstep(t)+offset;
+    const plateau=f.plateau??f.w*.4;
+    const run=(f.w-plateau)/2;
+    const local=x-f.x;
+    const entry=baseTerrain(f.x),exit=baseTerrain(f.x+f.w);
+    // A single horizontal deck, elevated above the higher terrain endpoint.
+    const deck=Math.min(entry,exit)-f.h;
+    if(local<run)return entry+(deck-entry)*smoothstep(local/run);
+    if(local<=f.w-run)return deck;
+    return deck+(exit-deck)*smoothstep((local-f.w+run)/run);
   }
-  if(f.type==="drop"){
-    const d=clamp(t,0,1);
-    // MTB drop: arrive on a high/flat take-off, pass the lip, descend
-    // decisively, then settle onto the lower landing. It is not a ramp
-    // drawn over the terrain; the surface itself is the rideable drop.
-    const approach=smoothstep(d/.34);
-    const fall=smoothstep((d-.30)/.22);
-    const settle=smoothstep((d-.58)/.42);
-    let offset=0;
-    if(d<=.30) offset=0;
-    else if(d<.52) offset=f.h*fall;
-    else if(d<.68) offset=f.h;
-    else offset=f.h*(1-settle);
-    return edge+(end-edge)*smoothstep(t)+offset;
-  }
+  if(f.type==="drop")return baseTerrain(x);
   return baseTerrain(x);
 }
 function terrain(x){
@@ -1097,19 +1199,6 @@ function drawFeature(f){
     ctx.lineTo(f.x+f.w,y1+24);ctx.lineTo(f.x,y0+24);ctx.closePath();ctx.fill();
     ctx.strokeStyle="#3e2b21";ctx.lineWidth=4/WORLD_ZOOM;ctx.beginPath();
     for(let i=0;i<=20;i++){const x=f.x+f.w*i/20,y=featureSurface(f,x);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();
-    // clean flat deck
-    const run=Math.max(90,Math.min(150,(f.w-(f.plateau||200))/2));
-    const a=f.x+run,b=f.x+f.w-run,yy=featureSurface(f,(a+b)/2);
-    ctx.fillStyle="#8b6244";ctx.fillRect(a,yy-3,b-a,6);
-  }else if(f.type==="drop"){
-    // The drop is the terrain profile itself. No artificial rail or extra
-    // overlay is drawn, so the contour stays clean and readable.
-    ctx.fillStyle="#69472f";ctx.beginPath();
-    ctx.moveTo(f.x,y0);
-    for(let i=1;i<=28;i++){const x=f.x+f.w*i/28;ctx.lineTo(x,featureSurface(f,x));}
-    ctx.lineTo(f.x+f.w,y1+24);ctx.lineTo(f.x,y0+24);ctx.closePath();ctx.fill();
-    ctx.strokeStyle="#3e2b21";ctx.lineWidth=4/WORLD_ZOOM;ctx.beginPath();
-    for(let i=0;i<=28;i++){const x=f.x+f.w*i/28,y=featureSurface(f,x);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();
   }  ctx.restore();
 }
 function drawSnowGround(worldLeft,worldRight){
@@ -1193,6 +1282,7 @@ function draw(){
 function loop(t){
   const dt=Math.min(.032,(t-last)/1000||.016);last=t;
   const now=performance.now();
+  if(menuPaused||gameExited){requestAnimationFrame(loop);return;}
 
   // All delayed state changes are handled here, in one place, once per frame.
   // This prevents stale timers/callbacks from changing the stage after a new
