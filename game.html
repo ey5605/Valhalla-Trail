@@ -70,6 +70,31 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 #completionScore{margin-top:18px;color:#ffe39a;font-weight:900}
 #completionScore .scoreLabel{display:block;font-size:16px;letter-spacing:.04em}
 #completionScore .scoreValue{display:block;font-size:clamp(32px,6vw,48px);line-height:1.2;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.stageActions{display:flex;direction:ltr;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.stageActions #restart{margin-top:0}
+#nextStage{border:0;border-radius:12px;padding:13px 22px;font-weight:900;font-size:15px;min-height:48px;background:#b8ef9e;color:#152118;touch-action:manipulation}
+#nextStage[hidden]{display:none}
+#msg{padding:12px;padding-top:max(12px,env(safe-area-inset-top));padding-bottom:max(12px,env(safe-area-inset-bottom))}
+#messageBox{min-width:0;width:min(440px,100%);max-width:100%;padding:18px 20px;max-height:100%;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
+#messageBox h2{font-size:22px;overflow-wrap:anywhere}
+#messageBox p{font-size:13px;line-height:1.35}
+#messageBox .finalTitle{font-size:28px!important;letter-spacing:.025em}
+#messageBox .celebrate{font-size:32px;letter-spacing:5px;margin-bottom:8px}
+#messageBox .finalCelebrate{font-size:38px;letter-spacing:3px}
+#messageBox #completionScore{margin-top:12px}
+#messageBox .scoreLabel{font-size:14px}
+#messageBox .scoreValue{font-size:clamp(28px,5vw,38px)}
+#messageBox .stageActions{margin-top:12px;gap:10px}
+#messageBox .stageActions button{font-size:14px;padding:10px 16px;min-height:44px}
+@media(max-height:450px){
+ #messageBox{padding:12px 16px}
+ #messageBox h2{font-size:20px;margin-bottom:4px}
+ #messageBox .finalTitle{font-size:24px!important}
+ #messageBox .celebrate,#messageBox .finalCelebrate{font-size:26px;margin-bottom:5px}
+ #messageBox #completionScore{margin-top:8px}
+ #messageBox .scoreValue{font-size:30px}
+ #messageBox .stageActions{margin-top:8px}
+}
 .scoreIcon{display:inline-block;width:22px;height:22px;vertical-align:middle;margin-right:5px;flex-shrink:0}
 </style>
 
@@ -195,7 +220,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
       <div><svg class="scoreIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m12 3-9 9h6v9h6v-9h6z" fill="#a6ff9e"/></svg> Jump — <b>+10</b></div>
       <div><svg class="scoreIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10" fill="#fff"/><circle cx="12" cy="12" r="7" fill="#ef6666"/><circle cx="12" cy="12" r="4" fill="#fff"/><circle cx="12" cy="12" r="2" fill="#ef6666"/></svg> Landing — <b>50 + airtime (seconds) × 20</b></div>
       <div><svg class="scoreIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5h13v14H5z" fill="#956037" stroke="#d09a61"/><ellipse cx="5" cy="12" rx="3" ry="7" fill="#956037"/><ellipse cx="18" cy="12" rx="4" ry="7" fill="#dfb37b" stroke="#704322"/><ellipse cx="18" cy="12" rx="2" ry="4" fill="none" stroke="#956037"/><path d="M5 9h8M5 15h8" stroke="#dfb37b"/></svg> Clean jump over a log — <b>+150</b></div>
-      <div><svg class="scoreIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5h13v14H5z" fill="#956037" stroke="#d09a61"/><ellipse cx="5" cy="12" rx="3" ry="7" fill="#956037"/><ellipse cx="18" cy="12" rx="4" ry="7" fill="#dfb37b" stroke="#704322"/><ellipse cx="18" cy="12" rx="2" ry="4" fill="none" stroke="#956037"/><path d="M5 9h8M5 15h8" stroke="#dfb37b"/></svg> Hit a log — <b>−100</b> (once per log)</div>
+      <div><svg class="scoreIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5h13v14H5z" fill="#956037" stroke="#d09a61"/><ellipse cx="5" cy="12" rx="3" ry="7" fill="#956037"/><ellipse cx="18" cy="12" rx="4" ry="7" fill="#dfb37b" stroke="#704322"/><ellipse cx="18" cy="12" rx="2" ry="4" fill="none" stroke="#956037"/><path d="M5 9h8M5 15h8" stroke="#dfb37b"/></svg> Hit a log — <b>−500</b> (once per log)</div>
       <div><svg class="scoreIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5h13v14H5z" fill="#956037" stroke="#d09a61"/><ellipse cx="5" cy="12" rx="3" ry="7" fill="#956037"/><ellipse cx="18" cy="12" rx="4" ry="7" fill="#dfb37b" stroke="#704322"/><ellipse cx="18" cy="12" rx="2" ry="4" fill="none" stroke="#956037"/><path d="M5 9h8M5 15h8" stroke="#dfb37b"/></svg> Roll over after a hit — <b>0</b></div>
       <div><svg class="scoreIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 22V2" stroke="#ddd" stroke-width="2"/><path d="M6 3h15v12H6z" fill="#fff"/><path d="M6 3h5v4H6zm10 0h5v4h-5zm-5 4h5v4h-5zm-5 4h5v4H6zm10 0h5v4h-5z" fill="#303443"/></svg> Stage finish — <b>no score bonus</b> • +1 life</div>
     </div>
@@ -224,7 +249,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
   <div class="box" id="messageBox">
     <div id="celebrate" class="celebrate" style="display:none">👏 🍺 🍺 👏</div>
     <h2 id="msgTitle"></h2><p id="msgSub"></p><div id="completionScore" hidden><span class="scoreLabel">TOTAL SCORE</span><strong class="scoreValue" id="completionScoreValue"></strong></div>
-    <button id="restart" type="button">↻ Ride again</button>
+    <div class="stageActions"><button id="restart" type="button">↻ Ride again</button><button id="nextStage" type="button" hidden>Next Stage →</button></div>
   </div>
 </div>
 <div id="rotate">↻<br><br>סובב את הטלפון לרוחב<br>לחוויית משחק מיטבית<br><br>Rotate your phone to landscape<br>for the best ride.</div>
@@ -267,7 +292,7 @@ function restartCurrentStage(){
   gameMenu.close();menuPaused=false;gameExited=false;
   stopApplause();clearControls();ensureAudio();
   gameOver=false;won=false;
-  p.score=stageEntry.score;lives=stageEntry.lives;
+  p.score=0;
   for(const item of [...coins,...diamonds])if(item.stage===currentStage)item.collected=false;
   for(const log of logs)if(log.stage===currentStage){log.hit=false;log.rewarded=false;log.hold=0;}
   logScoreEffects.length=0;
@@ -975,7 +1000,7 @@ function resolveLogCollisions(previousX){
     const approach=p.logApproach;
     if(!log.hit&&p.y+78>b.top){
       log.hit=true;log.hold=LOG_STOP_SECONDS;
-      logScore(log,-100);
+      logScore(log,-500);
     }
     if(log.hit&&log.hold>0){
       const side=approach.side;
@@ -1022,6 +1047,32 @@ function drawLogScores(){
     const text=effect.amount>0?'+'+effect.amount:'−'+Math.abs(effect.amount),y=effect.y-effect.age*36;
     ctx.strokeText(text,effect.x,y);ctx.fillText(text,effect.x,y);ctx.restore();
   }
+}
+
+// Choose a safe, rideable spot nearest each stage's halfway point.
+const checkpoints=STAGE_LENGTHS.map((length,stage)=>{
+ const mid=STAGE_STARTS[stage]+length/2;
+ for(let offset=0;offset<length/2-500;offset+=20){
+  for(const x of offset===0?[mid]:[mid+offset,mid-offset]){
+   if(surfaceY(x)==null||Math.abs(slope(x))>.45)continue;
+   if(allFeatures.some(f=>f.stage===stage&&x+300>f.x-(f.approach||0)&&x-220<f.x+f.w))continue;
+   if(logs.some(l=>l.stage===stage&&Math.abs(l.x-x)<180))continue;
+   return {stage,x,active:false};
+  }
+ }
+ throw Error('No safe checkpoint for stage '+stage);
+});
+function activateCheckpoint(){
+ const cp=checkpoints[currentStage];
+ if(!cp.active&&p.x>=cp.x)cp.active=true;
+}
+function drawCheckpoint(){
+ const cp=checkpoints[currentStage],y=surfaceY(cp.x);
+ ctx.save();ctx.translate(cp.x,y);
+ ctx.strokeStyle='#f0f6ec';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,-135);ctx.stroke();
+ ctx.fillStyle=cp.active?'#94ef83':'#ffd16a';ctx.beginPath();ctx.moveTo(2,-135);ctx.lineTo(90,-135);ctx.lineTo(74,-107);ctx.lineTo(90,-80);ctx.lineTo(2,-80);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#15251d';ctx.font='bold 24px system-ui';ctx.textAlign='center';ctx.fillText(cp.active?'✓':'½',43,-98);
+ ctx.font='bold 16px system-ui';ctx.fillStyle='#fff';ctx.strokeStyle='#17221e';ctx.lineWidth=4;ctx.strokeText(cp.active?'CHECKPOINT SAVED':'CHECKPOINT',25,-150);ctx.fillText(cp.active?'CHECKPOINT SAVED':'CHECKPOINT',25,-150);ctx.restore();
 }
 
 let p={x:120,y:0,vx:0,vy:0,angle:0,angVel:0,grounded:true,air:0,score:0,distance:0};
@@ -1158,13 +1209,26 @@ function bindSoundSettings(){
   sfxVol.addEventListener("input",()=>{soundPrefs.sfxVol=+sfxVol.value/100;saveSoundPrefs();updateSoundUI()});
 }
 bindSoundSettings();
-document.getElementById("restart").addEventListener("click",restart);
+function rideAgain(){
+  if(gamePhase==='ceremony'){
+    stageEntry.score=0;
+    restartCurrentStage();
+  }else restart();
+}
+function advanceStage(){
+  if(gamePhase!=='ceremony'||currentStage>=STAGE_COUNT-1)return;
+  stopApplause();clearControls();ensureAudio();startStage(currentStage+1);
+}
+document.getElementById('restart').addEventListener('click',rideAgain);
+document.getElementById('nextStage').addEventListener('click',advanceStage);
 addEventListener("pointerdown",()=>{if(gamePhase==="playing")startBackgroundMusic(currentStage)},{once:false});
 function clearControls(){
   Object.keys(keys).forEach(k=>keys[k]=false);
   document.querySelectorAll(".btn").forEach(b=>b.classList.remove("pressed"));
 }
 function restart(){
+  checkpoints.forEach(cp=>cp.active=false);
+  document.getElementById('nextStage').hidden=true;
   stopApplause();
   gameOver=false;
   won=false;
@@ -1196,6 +1260,8 @@ function finish(title,sub){
   msgTitle.textContent=title;msgSub.textContent=sub;msg.style.display="flex";
 }
 function startStage(s){
+  checkpoints[s].active=false;
+  document.getElementById('nextStage').hidden=true;
   if(s<0 || s>=STAGE_COUNT)return;
   stopBackgroundMusic();
   phaseEndsAt=0;
@@ -1235,6 +1301,7 @@ function completeStage(s){
   lives=Math.min(5,lives+1);
   showCompletionScore();
   const finalStage=(s===STAGE_COUNT-1);
+  document.getElementById('nextStage').hidden=finalStage;
   if(finalStage){
     playApplause(true);
     celebrate.textContent="🏆 🎉 🍺 👏 🎊 🏆";
@@ -1259,6 +1326,7 @@ function completeStage(s){
 }
 
 function loseLife(reason){
+  document.getElementById('nextStage').hidden=true;
   document.getElementById('completionScore').hidden=true;
   if(gamePhase!=="playing" || transitionLock)return;
   failedStage=currentStage;
@@ -1345,6 +1413,7 @@ function update(dt){
   }
   if(!p.grounded&&Math.abs(norm)>2.3&&p.air>.45){loseLife("The bike landed badly.");return;}
   if(p.y>baseTerrain(p.x)+700){loseLife("You fell off the trail.");return;}
+  activateCheckpoint();
   p.distance=Math.max(p.distance,p.x-STAGE_STARTS[stage]-120);
   const targetCamX=p.x-(W*CAMERA_X)/WORLD_ZOOM;
   const groundNow=surfaceY(p.x);
@@ -1482,6 +1551,7 @@ function draw(){
   }
   drawSnowGround(worldLeft,worldRight);
   for(const f of features)drawFeature(f);
+  drawCheckpoint();
   drawLogs(worldLeft,worldRight);
   drawLogScores();
   drawCoins(performance.now());
@@ -1507,14 +1577,11 @@ function loop(t){
   // All delayed state changes are handled here, in one place, once per frame.
   // This prevents stale timers/callbacks from changing the stage after a new
   // state has already been entered.
-  if(gamePhase==="ceremony" && !won && now>=phaseEndsAt){
-    const next=currentStage+1;
-    if(next<STAGE_COUNT) startStage(next);
-  }else if(gamePhase==="crash" && now>=phaseEndsAt){
+  if(gamePhase==="crash" && now>=phaseEndsAt){
     const s=failedStage;
     if(s>=0 && s<STAGE_COUNT){
-      const nx=STAGE_STARTS[s]+120;
-      p={x:nx,y:surfaceY(nx)-78,vx:0,vy:0,angle:0,angVel:0,grounded:true,air:0,score:p.score,distance:0};
+      const nx=checkpoints[s].active?checkpoints[s].x:STAGE_STARTS[s]+120;
+      p={x:nx,y:surfaceY(nx)-78,vx:0,vy:0,angle:Math.atan(slope(nx)),angVel:0,grounded:true,air:0,score:p.score,distance:Math.max(0,nx-STAGE_STARTS[s]-120)};
       camX=nx-(W*CAMERA_X)/WORLD_ZOOM;
       camY=surfaceY(nx)-(H*GROUND_Y)/WORLD_ZOOM;
       gamePhase="playing";
