@@ -440,7 +440,7 @@ function completeAchievements(s){
  const record=achievements.complete(s,result.attempt,result.fullScore);
  if(!record)return;
  const section=document.getElementById('achievementResult');section.hidden=false;
- document.getElementById('attemptResult').textContent='ניקוד הניסיון: '+record.attempt.toLocaleString()+' · שיא אישי: '+record.best.toLocaleString();
+ document.getElementById('attemptResult').textContent='ניקוד השלב: '+record.attempt.toLocaleString()+' · שיא אישי: '+record.best.toLocaleString();
  document.getElementById('newStageBest').hidden=!record.improved;
  const full=document.getElementById('fullRunResult');full.hidden=s!==STAGE_COUNT-1;
  if(s===STAGE_COUNT-1){
