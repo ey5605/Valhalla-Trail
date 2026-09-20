@@ -198,17 +198,48 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 #settingsBtn{right:max(64px,calc(52px + env(safe-area-inset-right)))}
 #fullscreen{right:max(116px,calc(104px + env(safe-area-inset-right))) !important;height:44px}
 </style>
+<style>#gameMenu{width:min(720px,calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)));max-height:calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));overflow-y:auto;overflow-x:hidden;padding:0 14px 12px;overscroll-behavior:contain;touch-action:pan-y;scrollbar-gutter:stable}
+#gameMenu .gameMenuHeader{position:sticky;top:0;z-index:2;background:#171827;padding:10px 0 7px}
+#gameMenu h2{font-size:16px;line-height:1.2;margin:0 44px}
+#gameMenuClose{top:2px;right:0;width:44px;height:44px;background:#171827;border-radius:10px}
+#gameMenu .gameMenuOption{margin-top:7px;padding:8px;min-height:44px;font-size:14px}
+#gameMenu .gameMenuOption span{font-size:11px;margin-top:1px}
+.gameMenuColumns{display:grid;grid-template-columns:minmax(0,1fr) minmax(155px,.7fr);gap:0;direction:ltr;align-items:start}.gameMenuActions{grid-column:2;grid-row:1;position:sticky;top:65px;padding:0 0 0 14px;min-width:0}#achievementsPanel{grid-column:1;grid-row:1;border-right:1px solid #ffffff30;padding-right:14px;min-width:0;text-align:right}
+#achievementsTitle{font-size:16px;margin:0 0 8px}
+.fullBestLine{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:14px}
+.fullBestLine b{color:#ffe39a;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+#gameMenu .achievementHint{font-size:12px;line-height:1.4;color:#c4cbdb;margin:4px 0 7px}
+.achievementStage{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;gap:2px 8px;align-items:center;width:100%;min-height:49px;border:1px solid #ffffff25;border-radius:9px;background:#242b3d;color:#fff;margin-top:6px;padding:7px 10px;text-align:start;font-family:inherit;cursor:pointer;touch-action:pan-y}
+.achievementStageName{grid-column:1;grid-row:1;font-size:12px;font-weight:750;text-align:right;overflow-wrap:anywhere}
+.achievementStageBest{grid-column:1;grid-row:2;font-size:12px;color:#cbd5e6}
+.achievementStageAction{grid-column:2;grid-row:1 / 3;font-size:13px}
+.achievementStage.currentStage{border-color:#97c5a1;box-shadow:inset -3px 0 #97c5a1}
+.achievementStage:disabled{opacity:.55;cursor:default}
+#achievementResult{font-size:13px;line-height:1.4;margin-top:9px;color:#e7efff;overflow-wrap:anywhere}
+#newStageBest{display:block;color:#b8ef9e}
+#fullRunResult{margin-top:5px;color:#ffe39a}
+#achievementResult[hidden],#newStageBest[hidden],#fullRunResult[hidden],#achievementNotice[hidden]{display:none}
+#achievementNotice{position:fixed;left:50%;transform:translateX(-50%);bottom:max(90px,env(safe-area-inset-bottom));width:min(420px,85vw);box-sizing:border-box;z-index:120;background:#243449f5;color:#fff;border:1px solid #91aac5;border-radius:10px;padding:10px 14px;font:600 13px/1.5 system-ui;text-align:center;pointer-events:none}
+@media(max-height:420px){#gameMenu{max-height:calc(100dvh - 12px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}#gameMenu .gameMenuHeader{padding:6px 0}#gameMenu h2{font-size:14px}#achievementResult{font-size:12px;margin-top:6px}}
+
+</style>
 </head>
 <body>
 <canvas id="game"></canvas>
 <button id="gameMenuBtn" type="button" aria-label="תפריט משחק / Game menu" aria-haspopup="dialog">☰</button>
-<dialog id="gameMenu" aria-labelledby="gameMenuTitle">
+<dialog id="gameMenu" aria-labelledby="gameMenuTitle"><div class="gameMenuHeader">
   <button id="gameMenuClose" type="button" aria-label="סגירה / Close">×</button>
-  <h2 id="gameMenuTitle"><span lang="he" dir="rtl">תפריט משחק</span><br>Game menu</h2>
-  <button id="exitGameBtn" class="gameMenuOption" type="button"><b lang="he" dir="rtl">לצאת מהמשחק</b><span>Exit game</span></button>
+  <h2 id="gameMenuTitle"><span lang="he" dir="rtl">תפריט משחק</span><br>Game menu</h2></div>
+  <div class="gameMenuColumns"><div class="gameMenuActions"><button id="exitGameBtn" class="gameMenuOption" type="button"><b lang="he" dir="rtl">לצאת מהמשחק</b><span>Exit game</span></button>
   <button id="newGameBtn" class="gameMenuOption" type="button"><b lang="he" dir="rtl">להתחיל משחק חדש</b><span>Start new game</span></button>
   <button id="restartStageBtn" class="gameMenuOption" type="button"><b lang="he" dir="rtl">להתחיל שלב מחדש</b><span>Restart stage</span></button>
-</dialog>
+</div><section id="achievementsPanel" dir="rtl" aria-labelledby="achievementsTitle">
+<h3 id="achievementsTitle">שלבים ושיאים אישיים</h3>
+<div class="fullBestLine">🏆 שיא למשחק מלא <b id="fullGameBest">—</b></div>
+<p class="achievementHint">כל 6 השלבים בריצה אחת</p>
+<p class="achievementHint">בחירת שלב מתחילה ריצה חדשה</p>
+<div id="achievementStages"></div>
+<p id="achievementStorageNote" class="achievementHint"></p></section></div></dialog>
 <div id="hud"><div class="title">VALHALLA TRAIL</div><div class="stats" id="stats"><span class="statsLine" id="statsLine1"></span><span class="statsLine" id="statsLine2"></span><span class="statsLine" id="statsLine3"></span><span class="statsLine scoreLine" id="statsLine4"></span></div><div class="lives" id="lives"></div></div>
 <button id="fullscreen" type="button">⛶ Full screen</button>
 <button id="settingsBtn" type="button" aria-label="Settings">⚙</button>
@@ -245,7 +276,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
   <button class="btn" data-action="leanForward" aria-label="Rotate bike left in air">↺ LEFT</button>
   <button class="btn" data-action="leanBack" aria-label="Rotate bike right in air">RIGHT ↻</button>
 </div>
-<dialog id="riderDialog" aria-labelledby="riderTitle"><h2 id="riderTitle">Choose your rider</h2><div class="riderChoices"><button type="button" data-rider="0" aria-label="Choose male rider"><img alt="Male rider"></button><button type="button" data-rider="1" aria-label="Choose female rider"><img alt="Female rider"></button></div></dialog><div id="controls">
+<dialog id="riderDialog" aria-labelledby="riderTitle"><h2 id="riderTitle">Choose your rider</h2><div class="riderChoices"><button type="button" data-rider="0" aria-label="Choose male rider"><img alt="Male rider"></button><button type="button" data-rider="1" aria-label="Choose female rider"><img alt="Female rider"></button></div></dialog><div id="achievementNotice" role="status" dir="rtl" hidden></div><div id="controls">
   <div class="group">
     <button class="btn" data-action="brake" aria-label="Brake / Reverse">◀ BRAKE<br>BACK</button>
     <button class="btn jump" id="jump" type="button" aria-label="Jump">⬆ JUMP</button>
@@ -259,12 +290,167 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
   <div class="box" id="messageBox">
     <div id="celebrate" class="celebrate" style="display:none">👏 🍺 🍺 👏</div>
     <h2 id="msgTitle"></h2><p id="msgSub"></p><div id="completionScore" hidden><span class="scoreLabel">TOTAL SCORE</span><strong class="scoreValue" id="completionScoreValue"></strong></div>
-    <div class="stageActions"><button id="restart" type="button">↻ Ride again</button><button id="nextStage" type="button" hidden>Next Stage →</button></div>
+    <div id="achievementResult" hidden dir="rtl" aria-live="polite"><div id="attemptResult"></div><strong id="newStageBest" hidden>שיא אישי חדש!</strong><div id="fullRunResult" hidden></div></div><div class="stageActions"><button id="restart" type="button">↻ Ride again</button><button id="nextStage" type="button" hidden>Next Stage →</button></div>
   </div>
 </div>
 <div id="rotate">↻<br><br>סובב את הטלפון לרוחב<br>לחוויית משחק מיטבית<br><br>Rotate your phone to landscape<br>for the best ride.</div>
 
 <script>
+// Increase ONLY when routes, scoring, physics, lives or fairness fixes make old
+// records incomparable. Never derive this from the release hash/date/commit.
+const ACHIEVEMENTS_VERSION = 1;
+const ACHIEVEMENTS_KEY = 'valhalla-trail.achievements';
+const ACHIEVEMENT_STAGE_IDS = Object.freeze(['pine-run','canyon-crossing','desert-ride','jungle-drop','alpine-gaps','volcanic-valhalla']);
+
+function createAchievementStore(getStorage, notify, version=ACHIEVEMENTS_VERSION){
+  const ids=ACHIEVEMENT_STAGE_IDS;
+  const fresh=()=>({version,unlocked:[ids[0]],bests:Object.fromEntries(ids.map(id=>[id,null])),fullBest:null});
+  const score=value=>Number.isSafeInteger(value)?value:null;
+  function validate(raw){
+    const result=fresh();
+    if(!raw||typeof raw!=='object'||Array.isArray(raw))return result;
+    if(Array.isArray(raw.unlocked)){
+      for(let i=1;i<ids.length;i++){
+        if(!raw.unlocked.includes(ids[i]))break;
+        result.unlocked.push(ids[i]);
+      }
+    }
+    if(raw.bests&&typeof raw.bests==='object'&&!Array.isArray(raw.bests))for(const id of ids)result.bests[id]=score(raw.bests[id]);
+    result.fullBest=score(raw.fullBest);
+    return result;
+  }
+  let data=fresh(),storage=null,writable=true,warningShown=false;
+  function disable(message){writable=false;if(!warningShown){warningShown=true;notify(message);}}
+  function read(){const text=storage.getItem(ACHIEVEMENTS_KEY);if(!text)return null;try{return JSON.parse(text);}catch(_){return null;}}
+  function isFuture(raw){return raw&&Number.isSafeInteger(raw.version)&&raw.version>version;}
+  function merge(other){
+    for(const id of ids){const b=other.bests[id];if(b!==null&&(data.bests[id]===null||b>data.bests[id]))data.bests[id]=b;}
+    if(other.unlocked.length>data.unlocked.length)data.unlocked=[...other.unlocked];
+    if(other.fullBest!==null&&(data.fullBest===null||other.fullBest>data.fullBest))data.fullBest=other.fullBest;
+  }
+  function save(){
+    if(!writable||!storage)return;
+    try{
+      const latest=read();
+      if(isFuture(latest)){disable('קיימים הישגים מגרסה חדשה יותר. עדכנו את המשחק; ההישגים בהפעלה זו זמניים.');return;}
+      if(latest?.version===version)merge(validate(latest));
+      storage.setItem(ACHIEVEMENTS_KEY,JSON.stringify(data));
+    }catch(_){disable('ההתקדמות לא תישמר במכשיר זה. אפשר להמשיך לשחק.');}
+  }
+  try{
+    storage=getStorage();const raw=read();
+    if(isFuture(raw))disable('קיימים הישגים מגרסה חדשה יותר. עדכנו את המשחק; ההישגים בהפעלה זו זמניים.');
+    else{
+      if(raw?.version===version)data=validate(raw);
+      if(raw&&Number.isSafeInteger(raw.version)&&raw.version<version)notify('ההתקדמות אופסה בעקבות שינוי במסלולים או בכללי המשחק');
+      save();
+    }
+  }catch(_){disable('ההתקדמות לא תישמר במכשיר זה. אפשר להמשיך לשחק.');}
+  function isUnlocked(stage){return Number.isInteger(stage)&&stage>=0&&stage<ids.length&&data.unlocked.includes(ids[stage]);}
+  return {
+    isUnlocked,
+    get persistent(){return writable;},
+    snapshot:()=>JSON.parse(JSON.stringify(data)),
+    complete(stage,attempt,fullScore=null){
+      if(!isUnlocked(stage)||!Number.isSafeInteger(attempt))return null;
+      // Refresh before comparing records in case another tab raised the best.
+      save();
+      const id=ids[stage],firstOrBetter=data.bests[id]===null||attempt>data.bests[id];
+      if(firstOrBetter)data.bests[id]=attempt;
+      if(stage+1<ids.length&&!data.unlocked.includes(ids[stage+1]))data.unlocked.push(ids[stage+1]);
+      const fullEligible=stage===ids.length-1&&Number.isSafeInteger(fullScore);
+      const fullImproved=fullEligible&&(data.fullBest===null||fullScore>data.fullBest);
+      if(fullImproved)data.fullBest=fullScore;
+      save();
+      return {attempt,best:data.bests[id],improved:firstOrBetter,fullEligible,fullBest:data.fullBest,fullImproved};
+    }
+  };
+}
+
+// Ephemeral attempt/run tracking: never persisted or inferred from total score.
+function createAchievementRun(){
+  let stage=null,attempt=0,eligible=false,completedThrough=0,finished=false;
+  return {
+    begin(s){stage=s;attempt=0;eligible=s===0;completedThrough=0;finished=false;},
+    enter(s){
+      if(stage!==null&&s!==stage&&!(s===stage+1&&finished))eligible=false;
+      stage=s;attempt=0;finished=false;
+    },
+    retry(){attempt=0;finished=false;},
+    add(delta){if(!finished&&stage!==null&&Number.isSafeInteger(delta))attempt+=delta;},
+    abandon(){stage=null;attempt=0;eligible=false;finished=false;completedThrough=0;},
+    gameOver(){eligible=false;attempt=0;finished=false;},
+    finish(s,total){
+      if(s!==stage||finished)return null;
+      finished=true;
+      if(eligible){if(s===completedThrough)completedThrough++;else if(s>completedThrough)eligible=false;}
+      return {attempt,fullScore:eligible&&s===5&&completedThrough===6?total:null};
+    },
+    snapshot:()=>({stage,attempt,eligible,completedThrough,finished})
+  };
+}
+
+let achievements=null;
+const achievementRun=createAchievementRun();
+let achievementNoticeTimer=0;
+let rideTipTimer=0;
+const initialRideInstructions=document.getElementById('tip').innerHTML;
+function scheduleRideTipHide(ms){
+ clearTimeout(rideTipTimer);
+ rideTipTimer=setTimeout(()=>tip.classList.add('hidden'),ms);
+}
+function achievementNotice(message){
+ const notice=document.getElementById('achievementNotice');
+ notice.textContent=message;notice.hidden=false;clearTimeout(achievementNoticeTimer);
+ achievementNoticeTimer=setTimeout(()=>{notice.hidden=true;},7000);
+}
+function awardScore(amount){p.score+=amount;achievementRun.add(amount);}
+function renderAchievementsMenu(){
+ if(!achievements)return;
+ const data=achievements.snapshot(),list=document.getElementById('achievementStages');
+ list.replaceChildren();
+ document.getElementById('fullGameBest').textContent=data.fullBest===null?'—':data.fullBest.toLocaleString();
+ document.getElementById('achievementStorageNote').textContent=achievements.persistent?'ההישגים נשמרים במכשיר ובדפדפן הנוכחיים':'ההתקדמות לא תישמר במכשיר זה';
+ ACHIEVEMENT_STAGE_IDS.forEach((id,s)=>{
+  const button=document.createElement('button');button.type='button';button.className='achievementStage';button.dataset.stage=String(s);
+  const open=achievements.isUnlocked(s);button.disabled=!open;
+  if(s===currentStage){button.classList.add('currentStage');button.setAttribute('aria-current','step');}
+  const title=document.createElement('span');title.className='achievementStageName';title.textContent=(s+1)+'. '+STAGE_NAMES[s];title.dir='ltr';
+  const best=document.createElement('span');best.className='achievementStageBest';best.textContent='שיא: '+(data.bests[id]===null?'—':data.bests[id].toLocaleString());
+  const action=document.createElement('span');action.className='achievementStageAction';action.textContent=open?'בחר':'🔒';
+  button.setAttribute('aria-label','שלב '+(s+1)+' '+STAGE_NAMES[s]+', '+best.textContent+(open?', בחר':', נעול'));
+  button.append(title,best,action);button.addEventListener('click',()=>selectAchievementStage(s));list.appendChild(button);
+ });
+}
+function selectAchievementStage(s){
+ if(!achievements?.isUnlocked(s))return false;
+ gameMenu.close();menuPaused=false;gameExited=false;menuOpenedAt=0;
+ riderDialog.close();settingsOverlay.style.display='none';
+ stopBackgroundMusic();stopApplause();clearControls();ensureAudio();
+ beginGame(s);
+ return true;
+}
+function completeAchievements(s){
+ const result=achievementRun.finish(s,p.score);
+ if(!result)return;
+ const record=achievements.complete(s,result.attempt,result.fullScore);
+ if(!record)return;
+ const section=document.getElementById('achievementResult');section.hidden=false;
+ document.getElementById('attemptResult').textContent='ניקוד הניסיון: '+record.attempt.toLocaleString()+' · שיא אישי: '+record.best.toLocaleString();
+ document.getElementById('newStageBest').hidden=!record.improved;
+ const full=document.getElementById('fullRunResult');full.hidden=s!==STAGE_COUNT-1;
+ if(s===STAGE_COUNT-1){
+  full.textContent=record.fullEligible?'ניקוד כולל: '+p.score.toLocaleString()+' · שיא למשחק מלא: '+record.fullBest.toLocaleString()+(record.fullImproved?' — שיא חדש למשחק מלא!':''):'לשיא במשחק מלא יש להתחיל משלב 1';
+ }
+ renderAchievementsMenu();
+}
+function initializeAchievements(){
+ achievements=createAchievementStore(()=>localStorage,achievementNotice);
+ // Stop menu input before it reaches document-level riding/music handlers.
+ for(const type of ['pointerdown','pointerup','pointermove','touchstart','touchmove','touchend','wheel'])gameMenu.addEventListener(type,e=>e.stopPropagation(),{passive:true});
+ renderAchievementsMenu();
+}
+
 let stageEntry={score:0,lives:5};
 let menuPaused=false,gameExited=false,menuOpenedAt=0;
 const gameMenu=document.getElementById("gameMenu"),gameMenuBtn=document.getElementById("gameMenuBtn");
@@ -276,6 +462,7 @@ function openGameMenu(){
   stageTracks.forEach(t=>t.pause());
   if(activeApplause)activeApplause.pause();
   settingsOverlay.style.display="none";
+  renderAchievementsMenu();
   gameMenu.showModal();
 }
 function closeGameMenu(){
@@ -300,6 +487,7 @@ function exitGame(){
   },200);
 }
 function restartCurrentStage(){
+  achievementRun.retry();
   gameMenu.close();menuPaused=false;gameExited=false;
   stopApplause();clearControls();ensureAudio();
   gameOver=false;won=false;
@@ -429,7 +617,7 @@ function doJump(){
     p.vy=-620;
     p.grounded=false;
     p.air=.02;
-    p.score+=10;
+    awardScore(10);
   }
 }
 const jump=document.getElementById("jump");
@@ -721,7 +909,7 @@ function collectCoins(){
     }
     if(touched){
       c.collected=true;
-      p.score+=100;
+      awardScore(100);
       logScoreEffects.push({x:c.x,y:c.y-38,stage:s,amount:100,age:0});
       coinSound();
     }
@@ -746,7 +934,7 @@ function collectDiamonds(){
     }
     if(touched){
       d.collected=true;
-      p.score+=200;
+      awardScore(200);
       logScoreEffects.push({x:d.x,y:d.y-45,stage:s,amount:200,age:0});
       diamondSound();
     }
@@ -992,7 +1180,7 @@ function logSound(success){
   }catch(_){}
 }
 function logScore(log,amount){
-  p.score+=amount;
+  awardScore(amount);
   logSound(amount>0);
   logScoreEffects.push({x:log.x,y:log.y-LOG_HEIGHT-32,stage:log.stage,amount,age:0});
 }
@@ -1258,12 +1446,19 @@ function clearControls(){
   document.querySelectorAll(".btn").forEach(b=>b.classList.remove("pressed"));
 }
 function restart(){
+  achievementRun.abandon();
   clearControls();stopBackgroundMusic();stopApplause();
   gamePhase='choosing';transitionLock=true;menuPaused=false;gameExited=false;phaseEndsAt=0;
   gameMenu.close();msg.style.display='none';
   if(!riderDialog.open)riderDialog.showModal();
 }
-function beginGame(){
+function beginGame(startingStage=0){
+  if(!achievements.isUnlocked(startingStage))return false;
+  achievementRun.begin(startingStage);
+  phaseEndsAt=0;failedStage=-1;menuOpenedAt=0;menuPaused=false;gameExited=false;
+  document.getElementById('achievementResult').hidden=true;
+  tip.innerHTML=initialRideInstructions;tip.classList.remove('hidden');scheduleRideTipHide(9000);
+  stopBackgroundMusic();
   checkpoints.forEach(cp=>cp.active=false);
   document.getElementById('nextStage').hidden=true;
   stopApplause();
@@ -1272,10 +1467,11 @@ function beginGame(){
   lives=5;
   resetCoins();
   resetLogs();
-  currentStage=0;
+  currentStage=startingStage;
   transitionLock=false;
   gamePhase="playing";
-  p={x:120,y:surfaceY(120)-78,vx:0,vy:0,angle:0,angVel:0,grounded:true,air:0,score:0,distance:0};
+  const spawnX=STAGE_STARTS[startingStage]+120;
+  p={x:spawnX,y:surfaceY(spawnX)-78,vx:0,vy:0,angle:0,angVel:0,grounded:true,air:0,score:0,distance:0};
   camX=p.x-(W*CAMERA_X)/WORLD_ZOOM;
   camY=surfaceY(p.x)-(H*GROUND_Y)/WORLD_ZOOM;
   msg.style.display="none";
@@ -1285,11 +1481,13 @@ function beginGame(){
   celebrate.classList.remove("finalCelebrate");
   clearControls();
   stageEntry={score:0,lives};
-  startBackgroundMusic(0);
+  startBackgroundMusic(startingStage);
+  renderAchievementsMenu();
 }
 
 function finish(title,sub){
   gameOver=title.includes("OUT OF LIVES");
+  if(gameOver)achievementRun.gameOver();
   won=title==="TRAIL COMPLETE!";
   gamePhase=gameOver?"gameover":"complete";
   clearControls();
@@ -1297,6 +1495,9 @@ function finish(title,sub){
   msgTitle.textContent=title;msgSub.textContent=sub;msg.style.display="flex";
 }
 function startStage(s){
+  if(!achievements.isUnlocked(s))return false;
+  achievementRun.enter(s);
+  document.getElementById('achievementResult').hidden=true;
   checkpoints[s].active=false;
   document.getElementById('nextStage').hidden=true;
   if(s<0 || s>=STAGE_COUNT)return;
@@ -1317,7 +1518,7 @@ function startStage(s){
   messageBox.classList.remove("finalBox");msgTitle.classList.remove("finalTitle");celebrate.classList.remove("finalCelebrate");celebrate.textContent="👏 🍺 🍺 👏";
   tip.innerHTML=`<b>STAGE ${s+1}: ${STAGE_NAMES[s]}</b><br>New course — ${STAGE_LENGTHS[s]/1000} km ahead.`;
   tip.classList.remove("hidden");
-  setTimeout(()=>tip.classList.add("hidden"),2200);
+  scheduleRideTipHide(2200);
 }
 function showCompletionScore(){
   document.getElementById('completionScoreValue').textContent=p.score.toLocaleString();
@@ -1336,6 +1537,7 @@ function completeStage(s){
   failedStage=-1;
   clearControls();
   lives=Math.min(5,lives+1);
+  completeAchievements(s);
   showCompletionScore();
   const finalStage=(s===STAGE_COUNT-1);
   document.getElementById('nextStage').hidden=finalStage;
@@ -1366,10 +1568,13 @@ function loseLife(reason){
   document.getElementById('nextStage').hidden=true;
   document.getElementById('completionScore').hidden=true;
   if(gamePhase!=="playing" || transitionLock)return;
+  achievementRun.retry();
+  document.getElementById('achievementResult').hidden=true;
   failedStage=currentStage;
   lives=Math.max(0,lives-1);
   clearControls();
   if(lives===0){
+    achievementRun.gameOver();
     transitionLock=true;
     gamePhase="gameover"; gameOver=true;
     horn(); celebrate.style.display="none";
@@ -1415,7 +1620,7 @@ function update(dt){
     if(!wasGrounded){
       if(p.air>.35&&!p.logRolling){
         const bonus=Math.round(50+p.air*20);
-        p.score+=bonus;
+        awardScore(bonus);
         const crossedGap=gaps.some(g=>g.stage===currentStage&&p.flightStartX<=g.x&&p.x>=g.x+g.w);
         if(crossedGap)logScoreEffects.push({x:p.x,y:ground-135,stage:currentStage,amount:bonus,age:0});
       }
@@ -1617,6 +1822,7 @@ function loop(t){
   if(gamePhase==="crash" && now>=phaseEndsAt){
     const s=failedStage;
     if(s>=0 && s<STAGE_COUNT){
+      achievementRun.retry();
       const nx=checkpoints[s].active?checkpoints[s].x:STAGE_STARTS[s]+120;
       p={x:nx,y:surfaceY(nx)-78,vx:0,vy:0,angle:Math.atan(slope(nx)),angVel:0,grounded:true,air:0,score:p.score,distance:Math.max(0,nx-STAGE_STARTS[s]-120)};
       camX=nx-(W*CAMERA_X)/WORLD_ZOOM;
@@ -1632,14 +1838,15 @@ function loop(t){
   update(dt);draw();requestAnimationFrame(loop)
 }
 
+initializeAchievements();
 restart();
 requestAnimationFrame(loop);
-setTimeout(()=>tip.classList.add("hidden"),9000);
+scheduleRideTipHide(9000);
 </script>
 
 <script>
 // Custom Stage 1 MP3: start on the first normal user interaction, with no Play button.
-document.addEventListener("pointerdown",()=>{if(gamePhase==="playing")startBackgroundMusic(currentStage)},{capture:true,passive:true});
+document.addEventListener("pointerdown",()=>{if(!menuPaused&&gamePhase==="playing")startBackgroundMusic(currentStage)},{capture:true,passive:true});
 </script>
 </body>
 </html>
