@@ -300,7 +300,9 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 // Increase ONLY when routes, scoring, physics, lives or fairness fixes make old
 // records incomparable. Never derive this from the release hash/date/commit.
 // Version 2: stage 5 first kicker/gap moved and gap length increased.
-const ACHIEVEMENTS_VERSION = 2;
+// Version 3: four stage 5 table coins moved into an airborne arc.
+// Version 4: lower the isolated coin after the stage 5 table to jump height.
+const ACHIEVEMENTS_VERSION = 4;
 const ACHIEVEMENTS_KEY = 'valhalla-trail.achievements';
 const ACHIEVEMENT_STAGE_IDS = Object.freeze(['pine-run','canyon-crossing','desert-ride','jungle-drop','alpine-gaps','volcanic-valhalla']);
 
@@ -838,6 +840,18 @@ for(let s=0;s<STAGE_COUNT;s++){
 // Preserve existing coin clearance over the resized tables.
 for(const [index,shift] of [[48,-44],[49,-32.592592592592595],[123,1.4173815969544314],[124,-141.26968697367047],[170,-199.18689440503798],[171,-354.15374012537677],[172,-291.7208521103733],[173,-227.6686396244632],[174,-126.9418420753702]])coins[index].y+=shift;
 
+// Four existing coins form a reachable arc over stage 5's table.
+{
+  const table=features.find(f=>f.stage===4&&f.type==='table');
+  const deck=featureSurface(table,table.x+table.w/2);
+  const arc=[[300,210],[470,275],[640,275],[810,210]];
+  for(let i=0;i<arc.length;i++){
+    const coin=coins.find(c=>c.stage===4&&c.x===STAGE_STARTS[4]+13800+i*200);
+    coin.x=table.x+arc[i][0];coin.y=deck-arc[i][1];
+  }
+  const exitCoin=coins.find(c=>c.stage===4&&c.x===STAGE_STARTS[4]+14600);
+  exitCoin.y=surfaceY(exitCoin.x)-220;
+}
 function resetCoins(){
   for(const c of coins)c.collected=false;
   for(const d of diamonds)d.collected=false;
