@@ -304,7 +304,8 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 // Version 4: lower the isolated coin after the stage 5 table to jump height.
 // Version 5: downhill ground tolerance and a single-use 100ms jump grace.
 // Version 6: double the width of stage 2's final gap.
-const ACHIEVEMENTS_VERSION = 6;
+// Version 7: add stage 1 gap at 14.1 km and widen stage 2 first gap to 187.5.
+const ACHIEVEMENTS_VERSION = 7;
 const ACHIEVEMENTS_KEY = 'valhalla-trail.achievements';
 const ACHIEVEMENT_STAGE_IDS = Object.freeze(['pine-run','canyon-crossing','desert-ride','jungle-drop','alpine-gaps','volcanic-valhalla']);
 
@@ -2033,3 +2034,4 @@ document.addEventListener("pointerdown",()=>{if(!menuPaused&&gamePhase==="playin
 </script>
 </body>
 </html>
+
