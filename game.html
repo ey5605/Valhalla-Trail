@@ -759,7 +759,15 @@ function dropTerrain(stage,lx,y){
 }
 function baseTerrain(x){
   const s=stageIndex(x),lx=localX(x);
-  return dropTerrain(s,lx,rawTerrain(s,lx)+stageOffsets[s]);
+  let y=dropTerrain(s,lx,rawTerrain(s,lx)+stageOffsets[s]);
+  // First-stage 14.1 km gap: rounded take-off and a slightly lower landing.
+  if(s===0 && lx>=13800 && lx<=14525){
+    const lip=rawTerrain(0,14100)-45;
+    if(lx<14100)y+=(lip-y)*smoothstep((lx-13800)/300);
+    else if(lx<=14225)y=lip+18*smoothstep((lx-14100)/125);
+    else y=lip+18+(y-lip-18)*smoothstep((lx-14225)/300);
+  }
+  return y;
 }
 // Preserve collectible clearance as the surrounding terrain changes.
 function collectibleTerrainShift(stage,x){
@@ -805,7 +813,8 @@ const featureSpecs=[
   {stage:5,type:"kicker",x:21400,w:340,h:78}
 ];
 const gapSpecs=[
-  {stage:1,x:11100,w:125},{stage:1,x:22200,w:280},
+  {stage:0,x:14100,w:125},
+  {stage:1,x:11100,w:187.5},{stage:1,x:22200,w:280},
   {stage:2,x:6500,w:145},{stage:2,x:15850,w:165},
   // Stage 4: gaps begin at the crest immediately after an uphill approach.
   {stage:3,x:6500,w:150},{stage:3,x:5600,w:165},
@@ -1713,15 +1722,143 @@ function update(dt){
   camY+=(targetCamY-camY)*follow;
 }
 
+// Decorative scenery only. Coordinates below never enter the riding physics.
+function sceneryNoise(n){const v=Math.sin(n*127.1+311.7)*43758.5453;return v-Math.floor(v);}
+function drawCanyonClouds(){
+  const time=performance.now()*.001;
+  ctx.save();
+  for(let i=0;i<5;i++){
+    const span=W+400;
+    const x=((i*span/5-camX*.035+time*4)%span+span)%span-160;
+    const y=H*(.11+.045*(i%3));
+    const size=Math.min(52,H*.08)*(1+.22*(i%2));
+    ctx.fillStyle="rgba(229,236,239,.62)";
+    ctx.beginPath();ctx.ellipse(x,y+size*.22,size*1.7,size*.36,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle="rgba(249,251,250,.83)";
+    for(let j=0;j<4;j++){
+      ctx.beginPath();ctx.ellipse(x+(j-1.5)*size*.68,y-size*(j===1?.17:0),size*(j===1?.88:.65),size*(j===1?.56:.39),0,0,Math.PI*2);ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+function drawCanyonScenery(){
+  ctx.save();drawCanyonClouds();
+  for(let layer=0;layer<2;layer++){
+    const cell=layer===0?285:340,scroll=camX*(layer===0?.09:.18);
+    const base=H*(layer===0?.73:.87);
+    const first=Math.floor(scroll/cell)-2,last=first+Math.ceil(W/cell)+5;
+    ctx.fillStyle=layer===0?"#a1afb5":"#748995";
+    ctx.fillRect(0,base-H*.025,W,H-base+H*.025);
+    for(let i=first;i<=last;i++){
+      const seed=i+layer*137,noise=k=>sceneryNoise(seed*11+k);
+      const x=i*cell-scroll-cell*.16+noise(1)*cell*.16;
+      const width=cell*(.76+noise(2)*.59);
+      // Tall narrow towers, broad mesas, split summits and slanted escarpments.
+      const kind=((i+layer)%4+4)%4;
+      const top=H*(.22+noise(3)*.33+layer*.04);
+      const height=base-top;
+      const shapes=[
+        [[0,1],[.12,.37],[.23,.33],[.27,0],[.59,0],[.66,.22],[.80,.24],[1,1]],
+        [[0,1],[.25,.35],[.32,.04],[.43,0],[.57,.08],[.62,.55],[.84,.69],[1,1]],
+        [[0,1],[.09,.40],[.21,.11],[.34,0],[.45,.35],[.55,.31],[.64,.06],[.73,.13],[.86,.59],[1,1]],
+        [[0,1],[.13,.52],[.19,.18],[.39,.08],[.70,0],[.84,.41],[.91,.44],[1,1]]
+      ];
+      const points=shapes[kind];
+      const lightness=(layer===0?61:43)+Math.round(noise(4)*12);
+      ctx.fillStyle=`hsl(204,${layer===0?12:17}%,${lightness}%)`;
+      ctx.beginPath();ctx.moveTo(x,base);
+      for(const [px,py] of points)ctx.lineTo(x+px*width,top+py*height);
+      ctx.closePath();ctx.fill();
+      // Clip each face's strata and shadow to its own irregular silhouette.
+      ctx.save();ctx.clip();
+      ctx.fillStyle="rgba(29,50,65,.20)";
+      ctx.beginPath();ctx.moveTo(x+width*.60,top-height*.1);
+      ctx.lineTo(x+width*1.2,top-height*.1);ctx.lineTo(x+width*1.2,base);
+      ctx.lineTo(x+width*(.42+noise(6)*.18),base);ctx.closePath();ctx.fill();
+      ctx.strokeStyle="rgba(223,230,232,.27)";ctx.lineWidth=1;
+      const bands=2+Math.floor(noise(7)*4);
+      for(let j=1;j<=bands;j++){
+        const y=top+height*(.15+j*.12);
+        ctx.beginPath();ctx.moveTo(x+width*.08,y);ctx.lineTo(x+width*.51,y+height*.018);ctx.lineTo(x+width*.93,y-height*.015);ctx.stroke();
+      }
+      ctx.restore();
+    }
+  }
+  ctx.restore();
+}
+
+function drawVolcanicScenery(){
+  const time=performance.now()*.001;
+  const cx=W*(.69+.025*Math.sin(camX*.000035)),peak=H*.24,base=H*.83;
+  const half=Math.min(W*.39,H*.64),crater=Math.max(18,half*.12);
+  ctx.save();
+  // Scale height around the original base; preserve sky colors and the original ridge.
+  ctx.translate(0,base*.20);ctx.scale(1,.80);
+  // Broad smoke puffs drift from the crater, rather than masking the route.
+  for(let i=0;i<12;i++){
+    const q=((time*.075+i/12)%1),r=H*(.022+.065*q);
+    const x=cx+q*H*.16+Math.sin(q*8+i)*H*.018,y=peak-q*H*.36;
+    ctx.fillStyle=`rgba(57,49,58,${.36*(1-q)})`;
+    ctx.beginPath();ctx.ellipse(x,y,r*1.4,r,0,0,Math.PI*2);ctx.fill();
+  }
+  ctx.fillStyle="#514653";ctx.beginPath();ctx.moveTo(cx-half,base);
+  ctx.lineTo(cx-half*.57,H*.61);ctx.lineTo(cx-half*.26,H*.41);
+  ctx.lineTo(cx-crater,peak);ctx.lineTo(cx+crater,peak+H*.008);
+  ctx.lineTo(cx+half*.28,H*.43);ctx.lineTo(cx+half*.69,H*.64);ctx.lineTo(cx+half,base);ctx.closePath();ctx.fill();
+  ctx.fillStyle="#382f3c";ctx.beginPath();ctx.moveTo(cx+crater,peak+H*.008);
+  ctx.lineTo(cx+half*.28,H*.43);ctx.lineTo(cx+half*.69,H*.64);ctx.lineTo(cx+half,base);ctx.lineTo(cx+half*.13,base);ctx.lineTo(cx-crater*.15,peak+H*.04);ctx.closePath();ctx.fill();
+  const pulse=.84+.12*Math.sin(time*2.1);
+  ctx.lineCap="round";ctx.lineJoin="round";
+  for(let vein=0;vein<3;vein++){
+    const sign=vein-1,sx=cx+sign*crater*.47;
+    for(let pass=0;pass<3;pass++){
+      ctx.strokeStyle=pass===0?`rgba(245,63,21,${.30*pulse})`:pass===1?"#ed5725":"#ffc66b";
+      ctx.lineWidth=pass===0?13:pass===1?5:1.8;
+      ctx.beginPath();ctx.moveTo(sx,peak+H*.018);
+      ctx.bezierCurveTo(sx+sign*half*.09,H*.38,sx+sign*half*.21-12,H*.39,sx+sign*half*.22,H*.46);
+      ctx.bezierCurveTo(sx+sign*half*.26+14,H*.53,sx+sign*half*.4,H*.58,sx+sign*half*.52,H*.68);ctx.stroke();
+    }
+  }
+  ctx.fillStyle="#231f2b";ctx.beginPath();ctx.ellipse(cx,peak+3,crater,7,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=`rgba(255,147,53,${pulse})`;ctx.beginPath();ctx.ellipse(cx,peak+4,crater*.83,3.5,0,0,Math.PI*2);ctx.fill();
+  for(let i=0;i<12;i++){
+    const q=(time*.24+sceneryNoise(i)*3)%1;
+    ctx.fillStyle=`rgba(255,183,76,${(1-q)*.8})`;
+    ctx.beginPath();ctx.arc(cx+Math.sin(i*4)*q*H*.065,peak-q*H*.15+q*q*H*.035,1+sceneryNoise(i+20),0,Math.PI*2);ctx.fill();
+  }
+  ctx.restore();
+}
+function drawSparseCanyonShrubs(worldLeft,worldRight){
+  const spacing=260;
+  ctx.save();
+  for(let i=Math.floor(worldLeft/spacing);i<=Math.ceil(worldRight/spacing);i++){
+    const x=i*spacing+sceneryNoise(i)*100,y=baseTerrain(x)-8;
+    ctx.strokeStyle="#626e61";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-12,y-24);ctx.moveTo(x,y);ctx.lineTo(x+15,y-30);ctx.stroke();
+    ctx.fillStyle="#788471";
+    for(let j=0;j<3;j++){ctx.beginPath();ctx.ellipse(x+(j-1)*14,y-23-(j%2)*9,14,8,0,0,Math.PI*2);ctx.fill();}
+  }
+  ctx.restore();
+}
+function drawVolcanicRocks(worldLeft,worldRight){
+  ctx.save();ctx.fillStyle="#403842";
+  for(let i=Math.floor(worldLeft/440);i<=Math.ceil(worldRight/440);i++){
+    const x=i*440+sceneryNoise(i)*80,y=baseTerrain(x),h=18+sceneryNoise(i+50)*21;
+    ctx.beginPath();ctx.moveTo(x-25,y);ctx.lineTo(x-16,y-h*.7);ctx.lineTo(x+5,y-h);ctx.lineTo(x+22,y-h*.45);ctx.lineTo(x+30,y);ctx.closePath();ctx.fill();
+  }
+  ctx.restore();
+}
+
 function drawSky(){
   const s=currentStage;
   const skies=[
-    ["#75b7df","#e6eddc"], ["#7bb7d2","#d7c3a1"], ["#f2b36b","#ead8a6"],
+    ["#75b7df","#e6eddc"], ["#b9d7e5","#e4e9e5"], ["#f2b36b","#ead8a6"],
     ["#58b9a0","#cfe8c8"], ["#8db5d8","#eef2e8"], ["#5d637e","#d38a67"]
   ];
   const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,skies[s][0]);g.addColorStop(1,skies[s][1]);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
 }
 function drawStageBackdrop(){
+  if(currentStage===1){drawCanyonScenery();return;}
+  if(currentStage===5)drawVolcanicScenery();
   const s=stageIndex(p.x), palette=["#6c8e83","#6e7887","#b27a52","#3f8069","#758da0","#4d4652"];
   ctx.fillStyle=palette[s];ctx.beginPath();ctx.moveTo(0,H*.64);
   for(let x=0;x<=W;x+=30){const wx=camX+x/WORLD_ZOOM;ctx.lineTo(x,H*.64-Math.sin(wx*.0014+s)*45-Math.sin(wx*.003+s)*18)}
@@ -1794,6 +1931,7 @@ function drawSnowGround(worldLeft,worldRight){
   }
 }
 function drawTrees(worldLeft,worldRight){
+  if(currentStage===1){drawSparseCanyonShrubs(worldLeft,worldRight);return;}
   const s=stageIndex(p.x), trunks=["#435f4e","#51483f","#75503b","#355c49","#4a514e","#3f3430"], tops=["#365d49","#586c7a","#9d663f","#2f745e","#536e82","#3e3942"];
   const spacing=s===2?260:220;
   for(let wx=Math.floor(worldLeft/spacing)*spacing;wx<=worldRight;wx+=spacing){
