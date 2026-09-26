@@ -237,7 +237,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 </div><section id="achievementsPanel" dir="rtl" aria-labelledby="achievementsTitle">
 <h3 id="achievementsTitle">שלבים ושיאים אישיים</h3>
 <div class="fullBestLine">🏆 שיא למשחק מלא <b id="fullGameBest">—</b></div>
-<p class="achievementHint">כל 6 השלבים בריצה אחת</p>
+<p class="achievementHint">כל 7 השלבים בריצה אחת</p>
 <p class="achievementHint">בחירת שלב מתחילה ריצה חדשה</p>
 <div id="achievementStages"></div>
 <p id="achievementStorageNote" class="achievementHint"></p></section></div></dialog>
@@ -261,8 +261,8 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
       <div><svg class="scoreIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 8 7 3h10l4 5-9 14z" fill="#67dfff" stroke="#c6f8ff" stroke-width="1.5"/><path d="m7 3 5 19 5-19M3 8h18" fill="none" stroke="#e5fbff"/></svg> Sparkling diamond — <b>+200</b></div>
       <div><svg class="scoreIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m12 3-9 9h6v9h6v-9h6z" fill="#a6ff9e"/></svg> Jump — <b>+10</b></div>
       <div><svg class="scoreIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10" fill="#fff"/><circle cx="12" cy="12" r="7" fill="#ef6666"/><circle cx="12" cy="12" r="4" fill="#fff"/><circle cx="12" cy="12" r="2" fill="#ef6666"/></svg> Landing — <b>50 + airtime (seconds) × 20</b></div>
-      <div><svg class="scoreIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5h13v14H5z" fill="#956037" stroke="#d09a61"/><ellipse cx="5" cy="12" rx="3" ry="7" fill="#956037"/><ellipse cx="18" cy="12" rx="4" ry="7" fill="#dfb37b" stroke="#704322"/><ellipse cx="18" cy="12" rx="2" ry="4" fill="none" stroke="#956037"/><path d="M5 9h8M5 15h8" stroke="#dfb37b"/></svg> Clean jump over a log — <b>+150</b></div>
-      <div><svg class="scoreIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5h13v14H5z" fill="#956037" stroke="#d09a61"/><ellipse cx="5" cy="12" rx="3" ry="7" fill="#956037"/><ellipse cx="18" cy="12" rx="4" ry="7" fill="#dfb37b" stroke="#704322"/><ellipse cx="18" cy="12" rx="2" ry="4" fill="none" stroke="#956037"/><path d="M5 9h8M5 15h8" stroke="#dfb37b"/></svg> Hit a log — <b>−500</b> (once per log)</div>
+      <div><svg class="scoreIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5h13v14H5z" fill="#956037" stroke="#d09a61"/><ellipse cx="5" cy="12" rx="3" ry="7" fill="#956037"/><ellipse cx="18" cy="12" rx="4" ry="7" fill="#dfb37b" stroke="#704322"/><ellipse cx="18" cy="12" rx="2" ry="4" fill="none" stroke="#956037"/><path d="M5 9h8M5 15h8" stroke="#dfb37b"/></svg> Clean jump over a log / city barrier — <b>+150</b></div>
+      <div><svg class="scoreIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5h13v14H5z" fill="#956037" stroke="#d09a61"/><ellipse cx="5" cy="12" rx="3" ry="7" fill="#956037"/><ellipse cx="18" cy="12" rx="4" ry="7" fill="#dfb37b" stroke="#704322"/><ellipse cx="18" cy="12" rx="2" ry="4" fill="none" stroke="#956037"/><path d="M5 9h8M5 15h8" stroke="#dfb37b"/></svg> Hit a log / city barrier — <b>−500</b> (once per log)</div>
       <div><svg class="scoreIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5h13v14H5z" fill="#956037" stroke="#d09a61"/><ellipse cx="5" cy="12" rx="3" ry="7" fill="#956037"/><ellipse cx="18" cy="12" rx="4" ry="7" fill="#dfb37b" stroke="#704322"/><ellipse cx="18" cy="12" rx="2" ry="4" fill="none" stroke="#956037"/><path d="M5 9h8M5 15h8" stroke="#dfb37b"/></svg> Roll over after a hit — <b>0</b></div>
       <div><svg class="scoreIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 22V2" stroke="#ddd" stroke-width="2"/><path d="M6 3h15v12H6z" fill="#fff"/><path d="M6 3h5v4H6zm10 0h5v4h-5zm-5 4h5v4h-5zm-5 4h5v4H6zm10 0h5v4h-5z" fill="#303443"/></svg> Stage finish — <b>no score bonus</b> • +1 life</div>
     </div>
@@ -305,9 +305,10 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 // Version 5: downhill ground tolerance and a single-use 100ms jump grace.
 // Version 6: double the width of stage 2's final gap.
 // Version 7: add stage 1 gap at 14.1 km and widen stage 2 first gap to 187.5.
-const ACHIEVEMENTS_VERSION = 7;
+// Richer urban finale and reordered final stages change achievement comparability.
+const ACHIEVEMENTS_VERSION = 12;
 const ACHIEVEMENTS_KEY = 'valhalla-trail.achievements';
-const ACHIEVEMENT_STAGE_IDS = Object.freeze(['pine-run','canyon-crossing','desert-ride','jungle-drop','alpine-gaps','volcanic-valhalla']);
+const ACHIEVEMENT_STAGE_IDS = Object.freeze(['pine-run','canyon-crossing','desert-ride','jungle-drop','alpine-gaps','city-limits','volcanic-valhalla']);
 
 function createAchievementStore(getStorage, notify, version=ACHIEVEMENTS_VERSION, now=()=>new Date()){
   const ids=ACHIEVEMENT_STAGE_IDS;
@@ -400,7 +401,7 @@ function createAchievementRun(){
       if(s!==stage||finished)return null;
       finished=true;
       if(eligible){if(s===completedThrough)completedThrough++;else if(s>completedThrough)eligible=false;}
-      return {attempt,fullScore:eligible&&s===5&&completedThrough===6?total:null};
+      return {attempt,fullScore:eligible&&s===STAGE_COUNT-1&&completedThrough===STAGE_COUNT?total:null};
     },
     snapshot:()=>({stage,attempt,eligible,completedThrough,finished})
   };
@@ -565,13 +566,14 @@ const CAMERA_X=.28;
 const GROUND_Y=.68;
 const WORLD_TERRAIN_BASE=529;
 const AIR_TRACK=.35;
-const STAGE_COUNT=6;
+const STAGE_COUNT=7;
+const URBAN_STAGE=5,VOLCANO_STAGE=6;
 // Every stage is derived directly from the unchanged stage-one riding speed.
 const BASE_SPEED_KMH=15;
 const BASE_RIDE_SPEED=560;
 const BASE_ACCELERATION=560;
 const BASE_BRAKING=390;
-const STAGE_SPEED_KMH=[15,17,19,21,21,23];
+const STAGE_SPEED_KMH=[15,17,19,21,21,23,23];
 const STAGE_RIDING=STAGE_SPEED_KMH.map(kmh=>{
   const ratio=kmh/BASE_SPEED_KMH;
   return {kmh,ratio,maxSpeed:BASE_RIDE_SPEED*ratio,acceleration:BASE_ACCELERATION*ratio,braking:BASE_BRAKING*ratio};
@@ -580,12 +582,12 @@ function stageMaxSpeed(stage){return STAGE_RIDING[stage].maxSpeed;}
 function displayedSpeed(vx,stage){
   return Math.round(Math.min(STAGE_RIDING[stage].kmh,Math.abs(vx)*BASE_SPEED_KMH/BASE_RIDE_SPEED));
 }
-const STAGE_LENGTHS=[20000,25000,25000,25000,25000,25000];
+const STAGE_LENGTHS=[20000,25000,25000,25000,25000,35000,25000];
 const STAGE_STARTS=[0];
 for(let i=1;i<STAGE_COUNT;i++)STAGE_STARTS[i]=STAGE_STARTS[i-1]+STAGE_LENGTHS[i-1];
 const FINISH_X=STAGE_STARTS[STAGE_COUNT-1]+STAGE_LENGTHS[STAGE_COUNT-1];
 
-const STAGE_NAMES=["PINE RUN","CANYON CROSSING","DESERT RIDE","JUNGLE DROP","ALPINE GAPS","VOLCANIC VALHALLA"];
+const STAGE_NAMES=["PINE RUN","CANYON CROSSING","DESERT RIDE","JUNGLE DROP","ALPINE GAPS","CITY LIMITS","VOLCANIC VALHALLA"];
 const keys={accelerate:false,brake:false,leanForward:false,leanBack:false};
 
 function resize(){
@@ -633,7 +635,7 @@ document.querySelectorAll("[data-action]").forEach(b=>bindButton(b,b.dataset.act
 function doJump(){
   if(gameOver||won||gamePhase!=="playing"||transitionLock)return;
   // Consume contact grace immediately, preventing a second airborne jump.
-  if(!p.jumpActive&&(p.grounded||(p.coyoteRemaining||0)>0)){
+  if(!p.jumpActive&&(p.grounded||(p.coyoteRemaining||0)>0||urbanJumpContact())){
     p.coyoteRemaining=0;
     p.flightStartX=p.x;
     p.jumpActive=true;p.logRolling=false;
@@ -685,7 +687,133 @@ addEventListener("blur",()=>clearControls());
 function stageIndex(x){let lo=0,hi=STAGE_COUNT-1;while(lo<hi){const m=Math.ceil((lo+hi)/2);if(x>=STAGE_STARTS[m])lo=m;else hi=m-1}return clamp(lo,0,STAGE_COUNT-1)}
 function localX(x){const s=stageIndex(x);return x-STAGE_STARTS[s]}
 function stageEndX(s){return STAGE_STARTS[s]+STAGE_LENGTHS[s]}
+// Stage-local city profile. Positive height goes down. Stairs have actual
+// treads and short risers, shared by collision sampling and rendering.
+const URBAN_PARTS=[
+ {length:1800,dy:-180,wave:75},
+ {length:500,dy:0},
+ {length:280,dy:-30,type:'curb',momentum:true},
+ {length:720,dy:30},
+ {length:1600,type:'stairs',flights:[{steps:25,tread:64,rise:20}]},
+ {length:1300,dy:-220,wave:60},
+ {length:800,dy:0},
+ {length:700,dy:130,type:'ledge'},
+ {length:1500,dy:-240,wave:65},
+ {length:1300,dy:0},
+ {length:1800,type:'stairs',flights:[{steps:10,tread:50,rise:20}, {landing:150}, {steps:10,tread:50,rise:20}, {landing:150}, {steps:10,tread:50,rise:20}]},
+ {length:1600,dy:-300,wave:75},
+ {length:300,dy:0},
+ // Three jump-only rises with 740 units of flat preparation after each lip.
+ {length:750,dy:-65,type:'curb'},
+ {length:750,dy:-70,type:'curb'},
+ {length:750,dy:-75,type:'curb'},
+ {length:450,dy:210},
+ {length:1300,dy:0},
+ {length:1900,type:'stairs',flights:[{steps:38,tread:50,rise:20}]},
+ {length:1500,dy:-360,wave:75},
+ {length:1300,dy:0},
+ {length:650,dy:150,type:'ledge'},
+ {length:1850,dy:-260,wave:85},
+ // Late technical plaza: two climbs with room to land before the next lip.
+ {length:750,dy:-65,type:'curb'},
+ {length:750,dy:-75,type:'curb'},
+ {length:100,dy:0},
+ {length:2060,type:'stairs',flights:[{steps:12,tread:48,rise:20},{landing:160},{steps:12,tread:48,rise:20},{landing:172},{steps:12,tread:48,rise:20}]},
+ {length:1340,dy:-420,wave:95},
+ {length:1400,dy:0},
+ {length:750,dy:-88,type:'curb'},
+ {length:750,dy:-75,type:'curb'},
+ {length:300,dy:115},
+ {length:600,type:'stairs',flights:[{steps:10,tread:60,rise:20}]},
+ {length:800,dy:-135,wave:45}
+];
+let urbanCursor=0,urbanHeight=0;
+for(const part of URBAN_PARTS){
+ part.x=urbanCursor;part.y=urbanHeight;
+ if(part.type==='stairs')part.dy=part.flights.reduce((n,f)=>n+(f.steps||0)*(f.rise||0),0);
+ urbanCursor+=part.length;urbanHeight+=part.dy;
+}
+function urbanPartAt(lx){return URBAN_PARTS.find(f=>lx>=f.x&&lx<f.x+f.length);}
+function urbanStairHeight(part,distance){
+ let x=0,y=0;
+ for(const flight of part.flights){
+  const length=flight.landing||flight.steps*flight.tread;
+  if(distance<x+length){
+   if(flight.landing)return y;
+   const q=Math.max(0,distance-x),step=Math.floor(q/flight.tread),within=q-step*flight.tread;
+   // Flat treads with a four-unit riser at their end, never a smooth ramp.
+   return y+step*flight.rise+flight.rise*clamp((within-flight.tread+4)/4,0,1);
+  }
+  x+=length;y+=(flight.steps||0)*(flight.rise||0);
+ }
+ return y;
+}
+function urbanTerrain(lx){
+ const part=urbanPartAt(lx);
+ if(!part)return WORLD_TERRAIN_BASE+(lx<0?0:urbanHeight);
+ const d=lx-part.x,t=d/part.length;
+ const height=part.type==='stairs'?urbanStairHeight(part,d):
+   part.type==='curb'?part.dy*smoothstep(d/10):
+   part.type==='ledge'?part.dy*smoothstep((d-150)/35):part.dy*smoothstep(t);
+ // Smooth waves have zero height and slope at joins; obstacle platforms stay flat.
+ return WORLD_TERRAIN_BASE+part.y+height+(part.wave||0)*Math.sin(2*Math.PI*t)**2;
+}
+function urbanJumpContact(){
+ // Only staircase chatter gets extra contact tolerance; a deliberate jump consumes it.
+ if(currentStage!==URBAN_STAGE||p.jumpActive||!urbanTreadAt(p.x)||p.air>.65)return false;
+ const gap=surfaceY(p.x)-78-p.y;
+ return gap>=0&&gap<=50&&p.vy>=-50;
+}
+function urbanStairsAt(x){if(stageIndex(x)!==URBAN_STAGE)return null;const f=urbanPartAt(x-STAGE_STARTS[URBAN_STAGE]);return f?.type==='stairs'?f:null;}
+function urbanTreadAt(x){
+ const f=urbanStairsAt(x);if(!f)return null;
+ let d=x-STAGE_STARTS[URBAN_STAGE]-f.x;
+ for(let i=0;i<f.flights.length;i++){
+  const a=f.flights[i],length=a.landing||a.steps*a.tread;
+  if(d<length)return a.landing?null:{key:f.x+':'+i+':'+Math.floor(d/a.tread),rise:a.rise,tread:a.tread};
+  d-=length;
+ }
+ return null;
+}
+// Tall curbs require clearance; low ones accept momentum. No global physics changes.
+function resolveUrbanCurbs(previousX){
+ if(currentStage!==URBAN_STAGE)return;
+ for(const f of URBAN_PARTS){
+  if(f.type!=='curb')continue;
+  const x=STAGE_STARTS[URBAN_STAGE]+f.x,top=baseTerrain(x+10);
+  if(previousX<=x&&p.x>x&&p.y+78>top+5&&(!f.momentum||p.vx<240)){
+   p.x=x-.1;p.vx=0;p.y=Math.min(p.y,baseTerrain(p.x)-78);
+  }
+ }
+}
+function urbanStairImpact(previousX,wasGrounded){
+ if(currentStage!==URBAN_STAGE||p.jumpActive||!p.grounded)return;
+ const step=urbanTreadAt(p.x),before=urbanTreadAt(previousX);
+ if(step&&before&&(!wasGrounded||step.key!==before.key)){
+  // A small physical rebound on each new tread, not a camera shake.
+  p.vy=-42;p.grounded=false;p.air=.001;p.flightStartX=previousX;
+ }
+}
+const URBAN_GAPS=[{stage:URBAN_STAGE,x:6200,w:300},{stage:URBAN_STAGE,x:17600,w:285},{stage:URBAN_STAGE,x:30800,w:315}];
+const URBAN_JUMP_LINES=[1650,5970,8100,9500,14850,17370,21700,25170,25920,29400,30570,31570,32320,34300];
+function addUrbanCollectibles(){
+ const start=STAGE_STARTS[URBAN_STAGE];
+ for(const [i,launch] of URBAN_JUMP_LINES.entries()){
+  const y=surfaceY(start+launch),speed=600;
+  for(const d of [95,205,315,425]){
+   const t=d/speed;
+   coins.push({stage:URBAN_STAGE,x:start+launch+d,y:y-148-620*t+625*t*t,collected:false,spin:i*.7});
+  }
+  if([1,4,6,10].includes(i)){
+   const d=270,t=d/speed;
+   diamonds.push({stage:URBAN_STAGE,x:start+launch+d,y:y-190-620*t+625*t*t,collected:false,spin:i});
+  }
+ }
+}
+
 function rawTerrain(stage,lx){
+  if(stage===URBAN_STAGE)return urbanTerrain(lx);
+  if(stage===VOLCANO_STAGE)stage=5; // Retain original terrain seed and amplitudes.
   // Smooth, progressively more mountainous terrain. Y increases downward.
   const phase=stage*1.37;
   const mountain=1+stage*.16;
@@ -736,8 +864,11 @@ function rawTerrain(stage,lx){
 const stageOffsets=[0];
 for(let s=1;s<STAGE_COUNT;s++) stageOffsets[s]=stageOffsets[s-1]+rawTerrain(s-1,STAGE_LENGTHS[s-1])-rawTerrain(s,0);
 const flowingDrops=[{"stage":0,"x":18500,"w":750,"h":200,"approach":200,"runout":600},{"stage":1,"x":14000,"w":900,"h":250,"approach":300,"runout":1000},{"stage":2,"x":14000,"w":1050,"h":310,"approach":300,"runout":650},{"stage":3,"x":15100,"w":1200,"h":370,"approach":250,"runout":1000},{"stage":4,"x":9200,"w":1350,"h":430,"approach":350,"runout":1400},{"stage":5,"x":11000,"w":1500,"h":500,"approach":400,"runout":1300}];
+flowingDrops[5].stage=VOLCANO_STAGE;
+flowingDrops.splice(URBAN_STAGE,0,null);
 function dropTerrain(stage,lx,y){
   const f=flowingDrops[stage];
+  if(!f)return y;
   if(lx<f.x-f.approach||lx>f.x+f.w+f.runout)return y;
   const lip=rawTerrain(stage,f.x)+stageOffsets[stage];
   if(lx<f.x)return y+(lip-y)*smoothstep((lx-f.x+f.approach)/f.approach);
@@ -774,7 +905,9 @@ function baseTerrain(x){
 function collectibleTerrainShift(stage,x){
   if(stage===0)return 0;
   const lx=x-STAGE_STARTS[stage];
-  return baseTerrain(x)-(rawTerrain(stage,lx)+stageOffsets[stage]);
+  const sample=stage<URBAN_STAGE&&x>=STAGE_STARTS[URBAN_STAGE]
+    ?baseTerrain(x+STAGE_LENGTHS[URBAN_STAGE])-(stageOffsets[VOLCANO_STAGE]-oldVolcanoOffset):baseTerrain(x);
+  return sample-(rawTerrain(stage,lx)+stageOffsets[stage]);
 }
 
 // Jump features: clean MTB shapes (kickers, tables and controlled drops).
@@ -833,7 +966,10 @@ const restoredBridgeSpecs=[
   {stage:4,x:16600,w:1100,h:0},
   {stage:5,x:17000,w:1200,h:0}
 ];
-featureSpecs.push(...restoredBridgeSpecs, ...flowingDrops.map(f=>({...f,type:"drop",flowing:true})));
+for(const f of [...featureSpecs,...gapSpecs,...restoredBridgeSpecs])if(f.stage===5)f.stage=VOLCANO_STAGE;
+featureSpecs.push(...restoredBridgeSpecs, ...flowingDrops.filter(Boolean).map(f=>({...f,type:"drop",flowing:true})));
+featureSpecs.push(...URBAN_PARTS.filter(p=>p.type).map(p=>({stage:URBAN_STAGE,type:p.type,x:p.x,w:p.length,h:Math.abs(p.dy)})));
+gapSpecs.push(...URBAN_GAPS);
 const features=featureSpecs.map(f=>({...f,x:STAGE_STARTS[f.stage]+f.x}));
 const gaps=gapSpecs.map(f=>({...f,x:STAGE_STARTS[f.stage]+f.x,type:"gap"}));
 const allFeatures=[...features,...gaps];
@@ -848,6 +984,13 @@ const coinLayoutsBackup=[
 ];
 const coinLayouts=[[[1200,179.2],[1400,57.5],[1600,-170.7],[1800,-41.7],[2000,42.3],[4100,149.1],[4300,71.8],[4500,-148.4],[4700,31.3],[4900,126.0],[6750,119.2],[6950,-14.0],[7150,-112.3],[7350,-27.8],[7550,105.9],[8575,109.8],[8775,-24.7],[8975,-29.5],[9175,33.8],[9375,100.0],[11975,132.3],[12175,43.6],[12375,-43.9],[12575,33.4],[12775,145.6],[14650,85.4],[14850,11.9],[15050,-80.1],[15250,-7.0],[15450,93.6],[17425,48.9],[17625,-117.4],[17825,-187.1],[18025,-104.2],[18225,90.4]],[[22600,134.4],[22800,25.0],[23000,-110.7],[23200,-102.8],[23400,-117.5],[25300,1.9],[25500,-94.8],[25700,-154.5],[25900,-168.7],[26100,-121.6],[29000,-29.3],[29200,-147.5],[29400,-214.9],[29600,-220.4],[29800,-137.1],[30600,83.4],[30800,-69.2],[31000,-134.4],[31200,-108.2],[31400,-22.6],[31950,-54.6],[32150,-168.3],[32350,-271.4],[32550,-165.0],[32750,-30.9],[36200,-120.7],[36400,-156.5],[36600,-145.5],[36800,-42.7],[37000,-27.5],[40300,-179.6],[40500,-246.6],[40700,-303.7],[40900,-208.6],[41100,-65.2],[42975,-112.1],[43175,-238.5],[43375,-327.9],[43575,-246.9],[43775,-180.8]],[[48875,-327.2],[49075,-426.7],[49275,-481.3],[49475,-404.1],[49675,-213.5],[50300,-70.6],[50500,-205.0],[50700,-233.8],[50900,-248.5],[51100,-155.2],[53825,-151.7],[54025,-309.5],[54225,-410.5],[54425,-357.2],[54625,-290.5],[56875,-162.3],[57075,-288.4],[57275,-392.5],[57475,-307.7],[57675,-237.2],[59400,-273.2],[59600,-334.0],[59800,-401.6],[60000,-352.1],[60200,-278.8],[63125,-224.4],[63325,-311.5],[63525,-404.8],[63725,-295.7],[63925,-218.3],[66300,-126.8],[66500,-146.5],[66700,-151.5],[66900,-122.1],[67100,-56.7],[68450,-118.0],[68650,-288.3],[68850,-403.1],[69050,-341.4],[69250,-253.8]],[[75000,-155.5],[75200,-246.4],[75400,-387.2],[75600,-296.1],[75800,-232.0],[79150,-242.5],[79350,-298.5],[79550,-379.0],[79750,-314.8],[79950,-271.0],[81750,-267.0],[81950,-405.0],[82150,-505.5],[82350,-375.4],[82550,-213.5],[84150,-13.4],[84350,-167.2],[84550,-299.8],[84750,-457.1],[84950,-408.9],[87000,104.7],[87200,52.0],[87400,-31.2],[87600,33.8],[87800,45.1],[88175,-129.4],[88375,-288.1],[88575,-406.9],[88775,-333.9],[88975,-245.4],[91225,-238.1],[91425,-345.5],[91625,-451.1],[91825,-400.7],[92025,-301.3],[94275,-142.8],[94475,-236.5],[94675,-408.4],[94875,-430.5],[95075,-361.8]],[[99600,-399.3],[99800,-464.4],[100000,-429.0],[100200,-434.2],[100400,-307.7],[102200,-134.5],[102400,-298.7],[102600,-406.8],[102800,-484.1],[103000,-389.6],[106550,-511.0],[106750,-621.5],[106950,-668.2],[107150,-566.6],[107350,-380.0],[108800,-140.2],[109000,-193.4],[109200,-349.6],[109400,-423.1],[109600,-444.5],[112700,-83.3],[112900,-300.1],[113100,-510.1],[113300,-697.2],[113500,-640.5],[113025,-347.1],[113225,-624.0],[113425,-750.9],[113625,-646.0],[113825,-509.9],[116575,-630.8],[116775,-765.5],[116975,-747.1],[117175,-632.1],[117375,-481.0],[119275,-267.8],[119475,-399.5],[119675,-569.1],[119875,-552.4],[120075,-471.4]],[[124400,-432.6],[124600,-561.7],[124800,-653.7],[125000,-660.5],[125200,-516.7],[127100,-307.9],[127300,-579.0],[127500,-736.7],[127700,-832.2],[127900,-721.8],[130600,-656.0],[130800,-766.4],[131000,-867.4],[131200,-786.5],[131400,-736.6],[133450,-226.3],[133650,-349.1],[133850,-471.8],[134050,-649.3],[134250,-609.2],[134175,-602.1],[134375,-659.6],[134575,-733.7],[134775,-600.7],[134975,-469.2],[137875,-589.3],[138075,-683.2],[138275,-758.8],[138475,-650.8],[138675,-536.8],[141000,-583.3],[141200,-536.9],[141400,-603.8],[141600,-639.2],[141800,-548.8],[143625,-413.2],[143825,-427.5],[144025,-489.9],[144225,-405.6],[144425,-345.9]]];
 
+// Layouts use absolute world coordinates; preserve volcano item clearance.
+const oldVolcanoOffset=stageOffsets[4]+rawTerrain(4,STAGE_LENGTHS[4])-rawTerrain(VOLCANO_STAGE,0);
+function reorderVolcanoItems(layout){
+ const items=layout[5],dx=STAGE_STARTS[VOLCANO_STAGE]-STAGE_STARTS[URBAN_STAGE],dy=stageOffsets[VOLCANO_STAGE]-oldVolcanoOffset;
+ layout.splice(URBAN_STAGE,0,[]);for(const item of items){item[0]+=dx;item[1]+=dy;}
+}
+reorderVolcanoItems(coinLayouts);
 const coins=[];
 for(let s=0;s<STAGE_COUNT;s++){
   for(const [i,[x,y]] of coinLayouts[s].entries()){
@@ -857,6 +1000,7 @@ for(let s=0;s<STAGE_COUNT;s++){
 }
 
 const diamondLayouts=[[[6175,254.9],[10850,340.1],[16150,315.8],[19225,294.9]],[[21775,18.5],[27075,-66.7],[34950,-106.0],[37625,-134.3]],[[46700,3.8],[51975,-85.7],[55722.4,116.3],[58350,-107.7]],[[71700,-147.7],[76337.2,-77.1],[80575,-13.2],[83250,-68.1]],[[97675,-301.6],[101325,-62.6],[105500,-163.2],[118650,-78.1]],[[122525,-336.7],[126275,-69.0],[129784.4,-240.0],[137225,-230.6]]];
+reorderVolcanoItems(diamondLayouts);
 const diamonds=[];
 for(let s=0;s<STAGE_COUNT;s++){
   for(const [x,y] of diamondLayouts[s]){
@@ -880,6 +1024,7 @@ for(const [index,shift] of [[48,-44],[49,-32.592592592592595],[123,1.41738159695
   const exitCoin=coins.find(c=>c.stage===4&&c.x===STAGE_STARTS[4]+14600);
   exitCoin.y=surfaceY(exitCoin.x)-220;
 }
+addUrbanCollectibles();
 function resetCoins(){
   for(const c of coins)c.collected=false;
   for(const d of diamonds)d.collected=false;
@@ -1179,6 +1324,8 @@ function surfaceY(x){
   return baseTerrain(x);
 }
 function slope(x){
+  const urbanStep=urbanTreadAt(x);
+  if(urbanStep)return urbanStep.rise/urbanStep.tread;
   const a=surfaceY(x-3),b=surfaceY(x+3);
   if(a==null||b==null)return 0;
   return (b-a)/6;
@@ -1187,6 +1334,7 @@ function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
 
 // Stage-local positions, reviewed against terrain, features and collectibles.
 const logLayouts=[[9960],[8350,18750],[8250,19840,22930],[4275,8200,19725,23450],[1500,6825,20090,23300],[1690,6525,16350,19450]];
+logLayouts.splice(URBAN_STAGE,0,[1900,9800,22000,33350]);
 const LOG_HALF_WIDTH=30,LOG_HEIGHT=62,BIKE_HALF_WIDTH=46,LOG_STOP_SECONDS=.35;
 const logs=logLayouts.flatMap((xs,stage)=>xs.map(lx=>{
   const x=STAGE_STARTS[stage]+lx;
@@ -1285,6 +1433,7 @@ function resolveLogCollisions(previousX){
 function drawLogs(worldLeft,worldRight){
   for(const log of logs){
     if(log.stage!==currentStage||log.x+70<worldLeft||log.x-70>worldRight)continue;
+    if(log.stage===URBAN_STAGE){drawUrbanBarrier(log);continue;}
     ctx.save();ctx.translate(log.x,log.y);ctx.rotate(log.angle);ctx.scale(.5,1);
     ctx.fillStyle='#24180f55';ctx.beginPath();ctx.ellipse(0,1,70,9,0,0,Math.PI*2);ctx.fill();
     ctx.lineWidth=3;ctx.strokeStyle='#402616';ctx.fillStyle='#80502d';
@@ -1325,17 +1474,20 @@ const checkpoints=STAGE_LENGTHS.map((length,stage)=>{
  }
  throw Error('No safe checkpoint for stage '+stage);
 });
+checkpoints[URBAN_STAGE].x=STAGE_STARTS[URBAN_STAGE]+13000;
+const urbanCheckpoint2={stage:URBAN_STAGE,x:STAGE_STARTS[URBAN_STAGE]+25000,active:false};
+function stageCheckpointList(s){return s===URBAN_STAGE?[checkpoints[URBAN_STAGE],urbanCheckpoint2]:[checkpoints[s]];}
+function respawnX(s){return stageCheckpointList(s).filter(cp=>cp.active).at(-1)?.x??STAGE_STARTS[s]+120;}
 function activateCheckpoint(){
- const cp=checkpoints[currentStage];
- if(!cp.active&&p.x>=cp.x)cp.active=true;
+ for(const cp of stageCheckpointList(currentStage))if(!cp.active&&p.x>=cp.x)cp.active=true;
 }
 function drawCheckpoint(){
- const cp=checkpoints[currentStage],y=surfaceY(cp.x);
+ for(const cp of stageCheckpointList(currentStage)){const y=surfaceY(cp.x);
  ctx.save();ctx.translate(cp.x,y);
  ctx.strokeStyle='#f0f6ec';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,-135);ctx.stroke();
  ctx.fillStyle=cp.active?'#94ef83':'#ffd16a';ctx.beginPath();ctx.moveTo(2,-135);ctx.lineTo(90,-135);ctx.lineTo(74,-107);ctx.lineTo(90,-80);ctx.lineTo(2,-80);ctx.closePath();ctx.fill();
- ctx.fillStyle='#15251d';ctx.font='bold 24px system-ui';ctx.textAlign='center';ctx.fillText(cp.active?'✓':'½',43,-98);
- ctx.font='bold 16px system-ui';ctx.fillStyle='#fff';ctx.strokeStyle='#17221e';ctx.lineWidth=4;ctx.strokeText(cp.active?'CHECKPOINT SAVED':'CHECKPOINT',25,-150);ctx.fillText(cp.active?'CHECKPOINT SAVED':'CHECKPOINT',25,-150);ctx.restore();
+ ctx.fillStyle='#15251d';ctx.font='bold 24px system-ui';ctx.textAlign='center';ctx.fillText(cp.active?'✓':(currentStage===URBAN_STAGE?(cp===urbanCheckpoint2?'2/2':'1/2'):'½'),43,-98);
+ ctx.font='bold 16px system-ui';ctx.fillStyle='#fff';ctx.strokeStyle='#17221e';ctx.lineWidth=4;ctx.strokeText(cp.active?'CHECKPOINT SAVED':'CHECKPOINT',25,-150);ctx.fillText(cp.active?'CHECKPOINT SAVED':'CHECKPOINT',25,-150);ctx.restore();}
 }
 
 let p={x:120,y:0,vx:0,vy:0,angle:0,angVel:0,grounded:true,air:0,score:0,distance:0};
@@ -1367,6 +1519,7 @@ const stageTracks=[
   new Audio("./bike%20-%20stage%203.mp3"),
   new Audio("./bike%20-%20stage%204.mp3"),
   new Audio("./bike%20-%20stage%205.mp3"),
+  new Audio("./Bike%20-%20stage%207.mp3"),
   new Audio("./bike%20-%20stage%206.mp3")
 ];
 stageTracks.forEach(t=>{t.preload="none";t.loop=true;});
@@ -1504,7 +1657,7 @@ function beginGame(startingStage=0){
   document.getElementById('achievementResult').hidden=true;
   tip.innerHTML=initialRideInstructions;tip.classList.remove('hidden');scheduleRideTipHide(9000);
   stopBackgroundMusic();
-  checkpoints.forEach(cp=>cp.active=false);
+  [...checkpoints,urbanCheckpoint2].forEach(cp=>cp.active=false);
   document.getElementById('nextStage').hidden=true;
   document.getElementById('restart').hidden=false;
   stopApplause();
@@ -1544,7 +1697,7 @@ function startStage(s){
   if(!achievements.isUnlocked(s))return false;
   achievementRun.enter(s);
   document.getElementById('achievementResult').hidden=true;
-  checkpoints[s].active=false;
+  stageCheckpointList(s).forEach(cp=>cp.active=false);
   document.getElementById('nextStage').hidden=true;
   if(s<0 || s>=STAGE_COUNT)return;
   stopBackgroundMusic();
@@ -1645,7 +1798,7 @@ function loseLife(reason){
 function update(dt){
   if(gameOver||won||transitionLock||gamePhase!=="playing")return;
   updateLogTimers(dt);
-  p.coyoteRemaining=p.grounded&&!p.jumpActive?COYOTE_TIME:Math.max(0,(p.coyoteRemaining||0)-dt);
+  p.coyoteRemaining=p.grounded&&!p.jumpActive?(currentStage===URBAN_STAGE?.18:COYOTE_TIME):Math.max(0,(p.coyoteRemaining||0)-dt);
   const previousX=p.x;
   const riding=STAGE_RIDING[currentStage];
   if(keys.accelerate)p.vx+=riding.acceleration*dt;
@@ -1663,12 +1816,13 @@ function update(dt){
     return;
   }
 
+  resolveUrbanCurbs(previousX);
   const surface=logRidingSurface(p.x),ground=surface==null?Infinity:surface-78,wasGrounded=p.grounded;
   const previousSurface=logRidingSurface(previousX);
   // Follow a descending surface only from established contact. True airborne
   // landings retain the original collision threshold and scoring behavior.
-  const adhere=wasGrounded&&!p.jumpActive&&p.vy>=0&&surface!=null&&previousSurface!=null
-    &&surface>=previousSurface&&ground-p.y>0&&ground-p.y<=GROUND_TOLERANCE;
+  const adhere=(wasGrounded||(currentStage===URBAN_STAGE&&urbanTreadAt(p.x)&&p.air<.65))&&!p.jumpActive&&p.vy>=0&&surface!=null&&previousSurface!=null
+    &&surface>=previousSurface&&ground-p.y>0&&ground-p.y<=(currentStage===URBAN_STAGE&&urbanTreadAt(p.x)?26:GROUND_TOLERANCE);
   const onGround=(p.y>=ground&&p.vy>=0)||adhere;
   if(p.grounded && surface!==surfaceY(p.x))p.logRolling=true;
   if(onGround){
@@ -1681,8 +1835,8 @@ function update(dt){
       }
       if(Math.abs(Math.atan2(Math.sin(p.angle),Math.cos(p.angle)))>1.15)p.vx*=.65;
     }
-    p.grounded=true;p.coyoteRemaining=COYOTE_TIME;p.air=0;p.y=ground;p.vy=0;
-    const target=Math.atan(logRidingSlope(p.x)),diff=Math.atan2(Math.sin(target-p.angle),Math.cos(target-p.angle));
+    p.grounded=true;p.coyoteRemaining=currentStage===URBAN_STAGE?.18:COYOTE_TIME;p.air=0;p.y=ground;p.vy=0;
+    const target=Math.atan(logRidingSlope(p.x)*(urbanTreadAt(p.x)?1.3:1)),diff=Math.atan2(Math.sin(target-p.angle),Math.cos(target-p.angle));
     p.angle+=diff*Math.min(1,dt*10);p.angVel*=.55;
   }else{
     if(wasGrounded){p.air=0;p.flightStartX=previousX;}p.grounded=false;p.air+=dt;
@@ -1690,6 +1844,7 @@ function update(dt){
     if(keys.leanBack)p.angVel+=12.0*dt;
     p.angVel*=Math.pow(.995,dt*60);p.angle+=p.angVel*dt;
   }
+  urbanStairImpact(previousX,wasGrounded);
   resolveLogCollisions(previousX);
   if(p.grounded){p.jumpActive=false;if(surface===surfaceY(p.x))p.logRolling=false;}
   collectCoins();
@@ -1849,18 +2004,103 @@ function drawVolcanicRocks(worldLeft,worldRight){
   ctx.restore();
 }
 
+// Decorative urban layers; all rideable geometry comes from urban-course.js.
+function urbanNoise(n){return (Math.sin(n*127.1+311.7)*43758.5453)%1*.5+.5;}
+function drawUrbanSkyline(){
+ const horizon=H*.66;
+ ctx.fillStyle='#f2ead46b';ctx.beginPath();ctx.arc(W*.82,H*.2,H*.08,0,Math.PI*2);ctx.fill();
+ for(const [layer,spacing] of [[0,105],[1,145]]){
+  const shift=camX*(layer===0?.045:.095),first=Math.floor(shift/spacing)-1;
+  for(let i=first;i<(shift+W)/spacing+1;i++){
+   const n=urbanNoise(i+layer*40),x=i*spacing-shift,w=spacing*(.66+n*.26),height=H*(.2+n*.3),top=horizon-height;
+   ctx.fillStyle=layer?'#657b8c':'#92a7b6';ctx.fillRect(x,top,w,height);
+   ctx.fillStyle=layer?'#7f939f':'#a9bac2';ctx.fillRect(x+3,top+3,w*.25,height-3);
+   if(i%3===0){ctx.fillStyle='#657b8c';ctx.fillRect(x+w*.4,top-20,w*.2,20);}
+   ctx.fillStyle=layer?'#c8d3cc77':'#e6e7d844';
+   for(let row=top+12;row<horizon-8;row+=18)for(let col=x+10;col<x+w-5;col+=15)ctx.fillRect(col,row,5,8);
+  }
+ }
+ // Parallel avenue sits behind the walkable foreground, not across gaps.
+ ctx.fillStyle='#48555f';ctx.fillRect(0,H*.67,W,H*.14);
+ ctx.strokeStyle='#e4d3a888';ctx.lineWidth=2;ctx.setLineDash([25,22]);ctx.beginPath();ctx.moveTo(0,H*.73);ctx.lineTo(W,H*.73);ctx.stroke();ctx.setLineDash([]);
+}
+function drawUrbanStreet(left,right){
+ const start=STAGE_STARTS[URBAN_STAGE];
+ // Fade apartments only; keep route, rider and street fixtures crisp.
+ ctx.save();ctx.globalAlpha*=.68;
+ for(let local=Math.floor((left-start)/390)*390;local<right-start+390;local+=390){
+  if(local<0||local>35000)continue;
+  const x=start+local,y=baseTerrain(x),n=urbanNoise(local),w=250+n*80,height=170+n*190;
+  ctx.fillStyle=['#9fa4a0','#b7b0a0','#8d9b9e'][Math.abs(Math.round(local/390))%3];ctx.fillRect(x,y-height-35,w,height);
+  ctx.fillStyle='#5c6d79';ctx.fillRect(x-8,y-height-43,w+16,8);
+  for(let row=0;row<Math.floor((height-45)/45);row++)for(let col=0;col<4;col++){
+   ctx.fillStyle=(row+col)%4===0?'#e9d8a4':'#4c6372';ctx.fillRect(x+20+col*57,y-height-18+row*45,30,25);
+   ctx.fillStyle='#d7d6c9';ctx.fillRect(x+17+col*57,y-height+8+row*45,36,4);
+  }
+  ctx.fillStyle='#3e5059';ctx.fillRect(x+25,y-78,62,43);
+  ctx.fillStyle='#d3aa74';ctx.fillRect(x+16,y-90,80,12);
+  // Garage entrance under apartments.
+  if(local%1170===0){ctx.fillStyle='#35424d';ctx.fillRect(x+130,y-95,100,60);ctx.fillStyle='#a3b0b4';for(let z=0;z<5;z++)ctx.fillRect(x+135,y-88+z*10,90,2);ctx.fillStyle='#527997';ctx.fillRect(x+205,y-123,25,25);ctx.fillStyle='#fff';ctx.font='bold 19px system-ui';ctx.fillText('P',x+211,y-104);}
+ }
+ ctx.restore();
+ for(let local=Math.floor((left-start)/650)*650;local<right-start+650;local+=650){
+  if(local<0||local>35000)continue;
+  const x=start+local,y=baseTerrain(x);
+  ctx.strokeStyle='#364754';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(x,y-18);ctx.lineTo(x,y-245);ctx.lineTo(x+55,y-245);ctx.stroke();
+  ctx.fillStyle='#fff0b4';ctx.fillRect(x+38,y-246,35,8);
+  if(local%1300===0){ctx.fillStyle='#8d8174';ctx.fillRect(x+160,y-40,88,40);ctx.fillStyle='#617b69';ctx.beginPath();ctx.ellipse(x+204,y-77,43,46,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#715e4b';ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(x+204,y-35);ctx.lineTo(x+204,y-88);ctx.stroke();}
+  if(local%2600===650){
+   ctx.fillStyle='#b1d0d344';ctx.fillRect(x+85,y-145,145,123);ctx.strokeStyle='#4b626e';ctx.lineWidth=6;ctx.strokeRect(x+85,y-145,145,123);ctx.fillStyle='#4b626e';ctx.fillRect(x+75,y-157,165,12);ctx.fillRect(x+101,y-59,103,8);ctx.fillStyle='#ece7d6';ctx.fillRect(x+185,y-140,35,54);ctx.fillStyle='#35556c';ctx.font='bold 12px system-ui';ctx.fillText('BUS',x+189,y-117);
+  }
+ }
+ // Railings trace the stair profile but remain behind the cyclist.
+ for(const f of URBAN_PARTS){
+  if(f.type!=='stairs'||start+f.x>right||start+f.x+f.length<left)continue;
+  ctx.strokeStyle='#647883';ctx.lineWidth=4;ctx.beginPath();
+  for(let d=0;d<=f.length;d+=20){const x=start+f.x+d,y=baseTerrain(x)-85;if(!d)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();
+  for(let d=0;d<=f.length;d+=140){const x=start+f.x+d,y=baseTerrain(x);ctx.beginPath();ctx.moveTo(x,y-85);ctx.lineTo(x,y-8);ctx.stroke();}
+ }
+ for(const g of gaps){if(g.stage!==URBAN_STAGE||g.x>right||g.x+g.w<left)continue;
+  const y=baseTerrain(g.x);ctx.fillStyle='#293842';ctx.fillRect(g.x,y+20,g.w,330);
+  ctx.fillStyle='#d3ad67';ctx.fillRect(g.x+g.w*.5-27,y+160,54,35);ctx.fillStyle='#334858';ctx.font='bold 24px system-ui';ctx.fillText('P',g.x+g.w*.5-9,y+186);
+ }
+}
+function drawUrbanPavement(left,right){
+ const start=STAGE_STARTS[URBAN_STAGE];
+ for(const f of URBAN_PARTS){
+  if(f.type!=='stairs'||start+f.x>right||start+f.x+f.length<left)continue;
+  let offset=0;
+  for(const flight of f.flights){
+   if(flight.landing){offset+=flight.landing;continue;}
+   for(let i=0;i<flight.steps;i++){
+    const x=start+f.x+offset+i*flight.tread,y=baseTerrain(x);
+    ctx.fillStyle='#cdd1cd';ctx.fillRect(x,y-2,flight.tread-4,4);
+    ctx.strokeStyle='#859198';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x+flight.tread-4,y);ctx.lineTo(x+flight.tread,y+flight.rise);ctx.stroke();
+   }
+   offset+=flight.steps*flight.tread;
+  }
+ }
+}
+function drawUrbanBarrier(log){
+ ctx.save();ctx.translate(log.x,log.y);ctx.rotate(log.angle);
+ ctx.fillStyle='#303a43';ctx.strokeStyle='#17212a';ctx.lineWidth=3;ctx.fillRect(-30,-62,60,62);ctx.strokeRect(-30,-62,60,62);
+ ctx.fillStyle='#eed084';ctx.fillRect(-29,-49,58,14);ctx.fillStyle='#4b5960';for(let i=-26;i<24;i+=18){ctx.beginPath();ctx.moveTo(i,-49);ctx.lineTo(i+10,-49);ctx.lineTo(i+2,-35);ctx.lineTo(i-8,-35);ctx.closePath();ctx.fill();}
+ ctx.restore();
+}
+
 function drawSky(){
   const s=currentStage;
   const skies=[
     ["#75b7df","#e6eddc"], ["#b9d7e5","#e4e9e5"], ["#f2b36b","#ead8a6"],
-    ["#58b9a0","#cfe8c8"], ["#8db5d8","#eef2e8"], ["#5d637e","#d38a67"]
+    ["#58b9a0","#cfe8c8"], ["#8db5d8","#eef2e8"], ["#7896ae","#eee4d0"], ["#5d637e","#d38a67"]
   ];
   const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,skies[s][0]);g.addColorStop(1,skies[s][1]);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
 }
 function drawStageBackdrop(){
+  if(currentStage===URBAN_STAGE){drawUrbanSkyline();return;}
   if(currentStage===1){drawCanyonScenery();return;}
-  if(currentStage===5)drawVolcanicScenery();
-  const s=stageIndex(p.x), palette=["#6c8e83","#6e7887","#b27a52","#3f8069","#758da0","#4d4652"];
+  if(currentStage===VOLCANO_STAGE)drawVolcanicScenery();
+  const s=currentStage===VOLCANO_STAGE?5:stageIndex(p.x), palette=["#6c8e83","#6e7887","#b27a52","#3f8069","#758da0","#4d4652"];
   ctx.fillStyle=palette[s];ctx.beginPath();
   if(s===5){
     // Lower foreground ridge with shorter, smooth waves; volcano stays unchanged.
@@ -1941,8 +2181,9 @@ function drawSnowGround(worldLeft,worldRight){
   }
 }
 function drawTrees(worldLeft,worldRight){
+  if(currentStage===URBAN_STAGE){drawUrbanStreet(worldLeft,worldRight);return;}
   if(currentStage===1){drawSparseCanyonShrubs(worldLeft,worldRight);return;}
-  const s=stageIndex(p.x), trunks=["#435f4e","#51483f","#75503b","#355c49","#4a514e","#3f3430"], tops=["#365d49","#586c7a","#9d663f","#2f745e","#536e82","#3e3942"];
+  const s=currentStage===VOLCANO_STAGE?5:stageIndex(p.x), trunks=["#435f4e","#51483f","#75503b","#355c49","#4a514e","#3f3430"], tops=["#365d49","#586c7a","#9d663f","#2f745e","#536e82","#3e3942"];
   const spacing=s===2?260:220;
   for(let wx=Math.floor(worldLeft/spacing)*spacing;wx<=worldRight;wx+=spacing){
     const y=baseTerrain(wx)-15,variation=Math.sin(wx*.03)*10;
@@ -1961,7 +2202,7 @@ function draw(){
   let inGap=false;
   const left=Math.floor(worldLeft/8)*8,right=Math.ceil(worldRight/8)*8;
   let bottom=camY+H/WORLD_ZOOM+800;
-  ctx.fillStyle="#6a5848";ctx.strokeStyle="#3e352e";ctx.lineWidth=5/WORLD_ZOOM;
+  ctx.fillStyle=currentStage===URBAN_STAGE?"#59626a":"#6a5848";ctx.strokeStyle=currentStage===URBAN_STAGE?"#d8dedc":"#3e352e";ctx.lineWidth=5/WORLD_ZOOM;
   ctx.beginPath();
   for(let wx=left;wx<=right;wx+=8){
     const y=surfaceY(wx);
@@ -1979,11 +2220,12 @@ function draw(){
       const segEnd=y==null?wx-step:wx;
       ctx.beginPath();ctx.moveTo(segStart,bottom);ctx.lineTo(segStart,surfaceY(segStart));
       for(let q=segStart+step;q<=segEnd;q+=step)ctx.lineTo(q,surfaceY(q));
-      ctx.lineTo(segEnd,bottom);ctx.closePath();ctx.fillStyle="#6a5848";ctx.fill();
-      ctx.beginPath();for(let q=segStart;q<=segEnd;q+=step){const yy=surfaceY(q);if(q===segStart)ctx.moveTo(q,yy);else ctx.lineTo(q,yy)}ctx.strokeStyle="#3e352e";ctx.lineWidth=5/WORLD_ZOOM;ctx.stroke();
+      ctx.lineTo(segEnd,bottom);ctx.closePath();ctx.fillStyle=currentStage===URBAN_STAGE?"#59626a":"#6a5848";ctx.fill();
+      ctx.beginPath();for(let q=segStart;q<=segEnd;q+=step){const yy=surfaceY(q);if(q===segStart)ctx.moveTo(q,yy);else ctx.lineTo(q,yy)}ctx.strokeStyle=currentStage===URBAN_STAGE?"#d8dedc":"#3e352e";ctx.lineWidth=5/WORLD_ZOOM;ctx.stroke();
       segStart=null;
     }
   }
+  if(currentStage===URBAN_STAGE)drawUrbanPavement(worldLeft,worldRight);
   drawSnowGround(worldLeft,worldRight);
   for(const f of features)drawFeature(f);
   drawCheckpoint();
@@ -1998,10 +2240,10 @@ function draw(){
     if(wx>worldLeft&&wx<worldRight){ctx.strokeStyle="#ffffff99";ctx.lineWidth=2/WORLD_ZOOM;ctx.beginPath();ctx.moveTo(wx,y-48);ctx.lineTo(wx,y);ctx.stroke();ctx.fillStyle="#fff";ctx.font=`bold ${12/WORLD_ZOOM}px system-ui`;ctx.textAlign="center";ctx.fillText(km+" km",wx,y-55)}
   }
   const stageFinish=stageEndX(curStage),fy=baseTerrain(stageFinish-2);ctx.strokeStyle="#26232e";ctx.lineWidth=8/WORLD_ZOOM;ctx.beginPath();ctx.moveTo(stageFinish-2,camY+H*.22/WORLD_ZOOM);ctx.lineTo(stageFinish-2,fy);ctx.stroke();ctx.fillStyle="#9c6ad8";ctx.beginPath();ctx.moveTo(stageFinish-2,camY+H*.22/WORLD_ZOOM);ctx.lineTo(stageFinish+73,camY+H*.26/WORLD_ZOOM);ctx.lineTo(stageFinish-2,camY+H*.30/WORLD_ZOOM);ctx.closePath();ctx.fill();
-  if(rider.complete&&rider.naturalWidth){const scale=Math.min(.205,Math.max(.145,H/1120)),bounds=imageBounds(rider),ih=1536*scale,iw=bounds.w/bounds.h*ih;ctx.save();ctx.translate(p.x,p.y-22);ctx.rotate(p.angle*.72);ctx.drawImage(rider,bounds.x,bounds.y,bounds.w,bounds.h,-iw*.5,-ih*.55,iw,ih);ctx.restore()}
+  if(rider.complete&&rider.naturalWidth){const scale=Math.min(.205,Math.max(.145,H/1120)),bounds=imageBounds(rider),ih=1536*scale,iw=bounds.w/bounds.h*ih;ctx.save();ctx.translate(p.x,p.y-22);ctx.rotate(p.angle*(urbanStairsAt(p.x)&&!p.jumpActive?.9:.72));ctx.drawImage(rider,bounds.x,bounds.y,bounds.w,bounds.h,-iw*.5,-ih*.55,iw,ih);ctx.restore()}
   ctx.restore();
   const current=currentStage;
-  statsLine1.textContent=`Stage ${current+1}/6 — ${STAGE_NAMES[current]}`;statsLine2.textContent=`Progress: ${(p.distance/1000).toFixed(1)} / ${(STAGE_LENGTHS[current]/1000).toFixed(0)}.0 km`;statsLine3.textContent=`Speed: ${displayedSpeed(p.vx,current)} km/h`;statsLine4.textContent=`🏆 SCORE: ${p.score.toLocaleString()}`;
+  statsLine1.textContent=`Stage ${current+1}/${STAGE_COUNT} — ${STAGE_NAMES[current]}`;statsLine2.textContent=`Progress: ${(p.distance/1000).toFixed(1)} / ${(STAGE_LENGTHS[current]/1000).toFixed(0)}.0 km`;statsLine3.textContent=`Speed: ${displayedSpeed(p.vx,current)} km/h`;statsLine4.textContent=`🏆 SCORE: ${p.score.toLocaleString()}`;
   livesEl.textContent="";lifeTop.textContent=`❤️ ${lives} / 5`;
 }
 function loop(t){
@@ -2016,7 +2258,7 @@ function loop(t){
     const s=failedStage;
     if(s>=0 && s<STAGE_COUNT){
       achievementRun.retry();
-      const nx=checkpoints[s].active?checkpoints[s].x:STAGE_STARTS[s]+120;
+      const nx=respawnX(s);
       p={x:nx,y:surfaceY(nx)-78,vx:0,vy:0,angle:Math.atan(slope(nx)),angVel:0,grounded:true,air:0,score:p.score,distance:Math.max(0,nx-STAGE_STARTS[s]-120)};
       camX=nx-(W*CAMERA_X)/WORLD_ZOOM;
       camY=surfaceY(nx)-(H*GROUND_Y)/WORLD_ZOOM;
