@@ -10,3 +10,4 @@ self.addEventListener('fetch',event=>{
  if(event.request.method!=='GET'||event.request.mode!=='navigate'||url.origin!==root.origin||!(url.pathname===root.pathname||url.href.split('?')[0]===HOME))return;
  event.respondWith((async()=>{const cache=await caches.open(SHELL);return await cache.match(HOME)||fetch(event.request);})());
 });
+

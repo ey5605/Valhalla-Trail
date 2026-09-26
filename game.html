@@ -1861,8 +1861,17 @@ function drawStageBackdrop(){
   if(currentStage===1){drawCanyonScenery();return;}
   if(currentStage===5)drawVolcanicScenery();
   const s=stageIndex(p.x), palette=["#6c8e83","#6e7887","#b27a52","#3f8069","#758da0","#4d4652"];
-  ctx.fillStyle=palette[s];ctx.beginPath();ctx.moveTo(0,H*.64);
-  for(let x=0;x<=W;x+=30){const wx=camX+x/WORLD_ZOOM;ctx.lineTo(x,H*.64-Math.sin(wx*.0014+s)*45-Math.sin(wx*.003+s)*18)}
+  ctx.fillStyle=palette[s];ctx.beginPath();
+  if(s===5){
+    // Lower foreground ridge with shorter, smooth waves; volcano stays unchanged.
+    const ridgeY=x=>{const wx=camX+x/WORLD_ZOOM;return H*.74-Math.sin(wx*.0042+5)*Math.min(32,H*.055)-Math.sin(wx*.009+1.2)*Math.min(9,H*.016);};
+    ctx.moveTo(0,ridgeY(0));
+    for(let x=0;x<W;x+=12)ctx.lineTo(x,ridgeY(x));
+    ctx.lineTo(W,ridgeY(W));
+  }else{
+    ctx.moveTo(0,H*.64);
+    for(let x=0;x<=W;x+=30){const wx=camX+x/WORLD_ZOOM;ctx.lineTo(x,H*.64-Math.sin(wx*.0014+s)*45-Math.sin(wx*.003+s)*18)}
+  }
   ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.fill();
   if(s===4){
     // Snowy alpine peaks in the distance; purely visual, no traction change.
@@ -2034,4 +2043,5 @@ document.addEventListener("pointerdown",()=>{if(!menuPaused&&gamePhase==="playin
 </script>
 </body>
 </html>
+
 

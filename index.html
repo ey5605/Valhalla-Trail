@@ -18,3 +18,4 @@ async function launch(){if(busy)return;busy=true;actions.hidden=true;statusEl.te
  }catch(_){statusEl.textContent='לא הצלחנו לבדוק או להוריד את העדכון. אפשר לנסות שוב'+(saved?' או לשחק בגרסה השמורה, שעשויה להיות ישנה.':'. לפתיחה הראשונה דרוש חיבור לאינטרנט.')+' / Update unavailable. Retry'+(saved?' or play the saved version.':'; internet required for first launch.');offline.hidden=!saved;actions.hidden=false;}finally{busy=false;}}
 document.getElementById('retry').onclick=launch;offline.onclick=()=>{if(saved&&!busy)play(saved.html);};launch();
 </script></body></html>
+
