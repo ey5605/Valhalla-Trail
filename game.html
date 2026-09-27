@@ -787,7 +787,7 @@ function resolveUrbanCurbs(previousX){
  }
 }
 function urbanStairImpact(previousX,wasGrounded){
- if(currentStage!==URBAN_STAGE||p.jumpActive||!p.grounded)return;
+ if(currentStage!==URBAN_STAGE||p.jumpActive||!p.grounded||Math.abs(p.x-previousX)<.05)return;
  const step=urbanTreadAt(p.x),before=urbanTreadAt(previousX);
  if(step&&before&&(!wasGrounded||step.key!==before.key)){
   // A small physical rebound on each new tread, not a camera shake.
@@ -1847,6 +1847,7 @@ function update(dt){
   urbanStairImpact(previousX,wasGrounded);
   resolveLogCollisions(previousX);
   if(p.grounded){p.jumpActive=false;if(surface===surfaceY(p.x))p.logRolling=false;}
+  updateWheelAnimation(previousX);
   collectCoins();
   collectDiamonds();
   const norm=Math.atan2(Math.sin(p.angle),Math.cos(p.angle));
@@ -2193,6 +2194,95 @@ function drawTrees(worldLeft,worldRight){
     ctx.beginPath();ctx.moveTo(wx,y-92+variation);ctx.lineTo(wx-28,y-40+variation);ctx.lineTo(wx+28,y-40+variation);ctx.closePath();ctx.fill();
   }
 }
+// Reversible wheel rendering. Each rider keeps source-specific wheel/occlusion geometry.
+let wheelPhase=0;
+const RIDER_WHEELS=[{x:149,y:1205,rx:96,ry:199},{x:730,y:1233,rx:166,ry:264}];
+const WOMAN_WHEELS=[{x:342,y:934,rx:126,ry:194},{x:928,y:977,rx:140,ry:216}];
+function activeRiderWheels(){return rider===womanRider?WOMAN_WHEELS:RIDER_WHEELS;}
+function updateWheelAnimation(previousX){
+ // Natural step chatter briefly clears grounded; it is still rolling contact.
+ if(p.jumpActive||(!p.grounded&&!urbanJumpContact()))return;
+ const bounds=imageBounds(rider),scale=Math.min(.205,Math.max(.145,H/1120));
+ const radius=activeRiderWheels()[1].ry*1536*scale/bounds.h;
+ wheelPhase=(wheelPhase+(p.x-previousX)/radius)%(Math.PI*2);
+}
+function stairVisualPitch(x){
+ if(currentStage!==URBAN_STAGE)return null;
+ // Average the designed flights over a short wheelbase window. Flat treads
+ // must not flatten the rider; landings and entrances still blend smoothly.
+ const local=x-STAGE_STARTS[URBAN_STAGE],left=local-65,right=local+65;
+ let rise=0,covered=0;
+ for(const part of URBAN_PARTS){
+  if(part.type!=='stairs'||part.x>=right||part.x+part.length<=left)continue;
+  let start=part.x;
+  for(const flight of part.flights){
+   const length=flight.landing||flight.steps*flight.tread;
+   const overlap=Math.max(0,Math.min(right,start+length)-Math.max(left,start));
+   covered+=overlap;if(!flight.landing)rise+=overlap*flight.rise/flight.tread;
+   start+=length;
+  }
+ }
+ return covered?{angle:Math.atan(1.3*rise/130)*.9,weight:covered/130}:null;
+}
+function riderRenderPose(bounds,iw,ih){
+ let angle=p.angle*(urbanStairsAt(p.x)&&!p.jumpActive?.9:.72),y=p.y-22;
+ const stairPitch=stairVisualPitch(p.x),surface=surfaceY(p.x);
+ const nearStair=surface!==null&&surface-78-p.y>=-2&&surface-78-p.y<=60&&p.air<.65&&p.vy>=-50;
+ if(stairPitch&&!p.jumpActive&&(p.grounded||nearStair)){
+  // Render-only alignment continues through tiny rebounds. Physical angle,
+  // vertical movement, intentional jumps and rotation controls are untouched.
+  angle=angle*(1-stairPitch.weight)+stairPitch.angle;
+ }
+ if(Math.abs(p.vx)<.5&&!p.jumpActive&&(p.grounded||urbanJumpContact())&&urbanStairsAt(p.x)){
+  // Only a stopped rider is capped. Moving downhill keeps the original full tilt.
+  angle=clamp(angle,-.38,.38);
+ }
+ return {angle,y};
+}
+function drawAnimatedRider(bounds,iw,ih){
+ const wheels=activeRiderWheels();
+ ctx.save();ctx.translate(-iw*.5,-ih*.55);ctx.scale(iw/bounds.w,ih/bounds.h);ctx.translate(-bounds.x,-bounds.y);
+ // Clip the old static spokes, preserving the original tire outlines.
+ ctx.save();ctx.beginPath();ctx.rect(0,0,rider.naturalWidth,rider.naturalHeight);
+ for(const w of wheels){ctx.moveTo(w.x+w.rx,w.y);ctx.ellipse(w.x,w.y,w.rx,w.ry,0,0,Math.PI*2);}
+ ctx.clip('evenodd');ctx.drawImage(rider,0,0);ctx.restore();
+ for(const w of wheels){
+  ctx.save();ctx.translate(w.x,w.y);ctx.scale(w.rx,w.ry);
+  // Opaque silver spokes with a dark edge stay readable against city and sky.
+  for(let i=0;i<24;i++){const a=wheelPhase+i*Math.PI/12;ctx.beginPath();ctx.moveTo(.08*Math.cos(a+.4),.08*Math.sin(a+.4));ctx.lineTo(.99*Math.cos(a),.99*Math.sin(a));ctx.lineWidth=.036;ctx.strokeStyle='#263039';ctx.stroke();ctx.lineWidth=.020;ctx.strokeStyle='#e3e9ed';ctx.stroke();}
+  // Small rotating rim markers convey motion at game scale without flashing.
+  ctx.lineWidth=.035;ctx.strokeStyle='#b8ab87';for(let i=0;i<3;i++){const a=wheelPhase+i*Math.PI*2/3;ctx.beginPath();ctx.arc(0,0,1.02,a,a+.08);ctx.stroke();}
+  ctx.restore();
+  // Rotating rubber tread and sidewall markings make the tire itself read as moving.
+  ctx.save();ctx.translate(w.x,w.y);ctx.scale(w.rx+34,w.ry+38);
+  ctx.strokeStyle='#292824';ctx.lineWidth=.095;ctx.beginPath();ctx.arc(0,0,1,0,Math.PI*2);ctx.stroke();
+  // 22 rather than 32 tread marks (~70%), muted opaque rubber tones.
+  for(let i=0;i<22;i++){const a=wheelPhase+i*Math.PI*2/22;ctx.strokeStyle=i%4===0?'#827966':'#605b50';ctx.lineWidth=.060;ctx.beginPath();ctx.arc(0,0,1,a,a+.055);ctx.stroke();}
+  ctx.restore();
+ }
+ // Restore foreground shoes, chain stays, hubs and fork from the untouched image.
+ const masks=rider===womanRider?[
+ [[400,700],[451,708],[451,790],[489,870],[474,906],[420,906],[353,859],[352,822]],
+ [[270,900],[404,850],[448,861],[350,920],[291,956],[255,948]],
+ [[277,925],[485,935],[518,1003],[485,1006],[304,963],[264,958]],
+ [[258,956],[295,955],[333,1005],[314,1077],[278,1090],[254,1073]],
+ [[291,1061],[526,1019],[548,1037],[297,1092]],
+ [[787,712],[839,696],[865,815],[892,942],[916,976],[888,1012],[853,1002],[827,906]],
+ [[875,748],[921,768],[948,916],[909,938]],
+ ]:[
+ [[131,945],[244,967],[241,1135],[304,1248],[283,1305],[196,1280],[118,1189],[90,1156]],
+ [[47,1191],[167,1187],[292,1242],[291,1286],[161,1257],[58,1240]],
+ [[48,1270],[90,1225],[132,1240],[147,1302],[96,1334],[65,1320]],
+ [[544,949],[612,925],[655,1018],[695,1182],[733,1211],[725,1278],[651,1282],[615,1160]],
+ [[655,957],[704,958],[751,1160],[706,1190]],
+ ];
+ ctx.save();ctx.beginPath();for(const points of masks){ctx.moveTo(...points[0]);for(const point of points.slice(1))ctx.lineTo(...point);ctx.closePath();}
+ const hubs=rider===womanRider?[[920,982,69,84],[305,925,53,66]]:[[735,1236,75,98]];
+ for(const [x,y,rx,ry] of hubs){ctx.moveTo(x+rx,y);ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);}
+ ctx.clip();ctx.drawImage(rider,0,0);ctx.restore();
+ ctx.restore();
+}
+
 function draw(){
   ctx.clearRect(0,0,W,H);drawSky();drawStageBackdrop();
   ctx.save();ctx.scale(WORLD_ZOOM,WORLD_ZOOM);ctx.translate(-camX,-camY);
@@ -2240,7 +2330,7 @@ function draw(){
     if(wx>worldLeft&&wx<worldRight){ctx.strokeStyle="#ffffff99";ctx.lineWidth=2/WORLD_ZOOM;ctx.beginPath();ctx.moveTo(wx,y-48);ctx.lineTo(wx,y);ctx.stroke();ctx.fillStyle="#fff";ctx.font=`bold ${12/WORLD_ZOOM}px system-ui`;ctx.textAlign="center";ctx.fillText(km+" km",wx,y-55)}
   }
   const stageFinish=stageEndX(curStage),fy=baseTerrain(stageFinish-2);ctx.strokeStyle="#26232e";ctx.lineWidth=8/WORLD_ZOOM;ctx.beginPath();ctx.moveTo(stageFinish-2,camY+H*.22/WORLD_ZOOM);ctx.lineTo(stageFinish-2,fy);ctx.stroke();ctx.fillStyle="#9c6ad8";ctx.beginPath();ctx.moveTo(stageFinish-2,camY+H*.22/WORLD_ZOOM);ctx.lineTo(stageFinish+73,camY+H*.26/WORLD_ZOOM);ctx.lineTo(stageFinish-2,camY+H*.30/WORLD_ZOOM);ctx.closePath();ctx.fill();
-  if(rider.complete&&rider.naturalWidth){const scale=Math.min(.205,Math.max(.145,H/1120)),bounds=imageBounds(rider),ih=1536*scale,iw=bounds.w/bounds.h*ih;ctx.save();ctx.translate(p.x,p.y-22);ctx.rotate(p.angle*(urbanStairsAt(p.x)&&!p.jumpActive?.9:.72));ctx.drawImage(rider,bounds.x,bounds.y,bounds.w,bounds.h,-iw*.5,-ih*.55,iw,ih);ctx.restore()}
+  if(rider.complete&&rider.naturalWidth){const scale=Math.min(.205,Math.max(.145,H/1120)),bounds=imageBounds(rider),ih=1536*scale,iw=bounds.w/bounds.h*ih;ctx.save();const pose=riderRenderPose(bounds,iw,ih);ctx.translate(p.x,pose.y);ctx.rotate(pose.angle);drawAnimatedRider(bounds,iw,ih);ctx.restore()}
   ctx.restore();
   const current=currentStage;
   statsLine1.textContent=`Stage ${current+1}/${STAGE_COUNT} — ${STAGE_NAMES[current]}`;statsLine2.textContent=`Progress: ${(p.distance/1000).toFixed(1)} / ${(STAGE_LENGTHS[current]/1000).toFixed(0)}.0 km`;statsLine3.textContent=`Speed: ${displayedSpeed(p.vx,current)} km/h`;statsLine4.textContent=`🏆 SCORE: ${p.score.toLocaleString()}`;
